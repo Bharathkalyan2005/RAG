@@ -29,7 +29,7 @@ app = FastAPI(title="Enterprise RAG AI Assistant", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["https://enterprise-rag.vercel.app", "http://localhost:3000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -38,6 +38,11 @@ app.add_middleware(
 ingestion_engine = DocumentIngestionEngine()
 rag_generator = RAGGenerator()
 hybrid_retriever = HybridRetriever()
+
+
+@app.get("/")
+def health_check():
+    return {"status": "ok", "message": "Enterprise RAG API is running"}
 
 
 class QueryRequest(BaseModel):
