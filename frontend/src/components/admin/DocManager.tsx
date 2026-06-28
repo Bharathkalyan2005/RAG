@@ -88,16 +88,19 @@ function getStatusBadge(status: Document["status"]) {
 export default function DocManager({ refreshKey = 0 }: DocManagerProps) {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Document | null>(null);
   const [deleting, setDeleting] = useState(false);
 
   const fetchDocuments = useCallback(async () => {
     setLoading(true);
+    setError(null);
     try {
       const data = await getDocuments();
       setDocuments(data);
     } catch {
       setDocuments([]);
+      setError("⚠️ Cannot load documents. Backend may be offline.");
     } finally {
       setLoading(false);
     }
@@ -141,6 +144,8 @@ export default function DocManager({ refreshKey = 0 }: DocManagerProps) {
             <div className="flex justify-center py-8">
               <Loader2 className="h-6 w-6 animate-spin text-indigo" />
             </div>
+          ) : error ? (
+            <p className="py-8 text-center text-red-400">{error}</p>
           ) : documents.length === 0 ? (
             <p className="py-8 text-center text-slate-400">
               No documents indexed yet. Upload your first document above.

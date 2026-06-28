@@ -20,13 +20,16 @@ interface AnalyticsData {
 export default function AnalyticsView() {
   const [data, setData] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const fetchAnalytics = useCallback(async () => {
     try {
       const result = await getAnalytics();
       setData(result);
+      setError(null);
     } catch {
       setData(null);
+      setError("⚠️ Cannot load analytics.");
     } finally {
       setLoading(false);
     }
@@ -72,6 +75,8 @@ export default function AnalyticsView() {
           <div className="flex justify-center py-8">
             <Loader2 className="h-6 w-6 animate-spin text-indigo" />
           </div>
+        ) : error ? (
+          <p className="py-8 text-center text-red-400">{error}</p>
         ) : (
           <div className="space-y-6">
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
