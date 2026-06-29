@@ -2,7 +2,7 @@ import os
 import re
 
 from langchain_community.vectorstores import Chroma
-from langchain_google_genai import GoogleGenerativeAIEmbeddings
+from langchain_huggingface import HuggingFaceEmbeddings
 from rank_bm25 import BM25Okapi
 
 from config import settings
@@ -10,9 +10,8 @@ from config import settings
 
 class HybridRetriever:
     def __init__(self) -> None:
-        self.embeddings = GoogleGenerativeAIEmbeddings(
-            model=settings.EMBEDDING_MODEL,
-            google_api_key=settings.GOOGLE_API_KEY,
+        self.embeddings = HuggingFaceEmbeddings(
+            model_name=settings.EMBEDDING_MODEL
         )
         os.makedirs(settings.CHROMA_PERSIST_DIR, exist_ok=True)
         self.vector_store = Chroma(

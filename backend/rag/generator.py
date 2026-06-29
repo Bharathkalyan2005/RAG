@@ -1,7 +1,8 @@
 import json
 import time
 
-from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_huggingface import HuggingFaceEndpoint
+from langchain_core.messages import HumanMessage, SystemMessage
 
 from config import settings
 from database import get_db_connection
@@ -22,10 +23,11 @@ RULES:
 
 class RAGGenerator:
     def __init__(self) -> None:
-        self.llm = ChatGoogleGenerativeAI(
-            model=settings.LLM_MODEL,
-            temperature=0.0,
-            google_api_key=settings.GOOGLE_API_KEY,
+        self.llm = HuggingFaceEndpoint(
+            repo_id=settings.LLM_MODEL,
+            huggingfacehub_api_token=settings.HF_API_KEY,
+            max_new_tokens=1024,
+            temperature=0.1,
         )
         self.retriever = HybridRetriever()
 
@@ -57,11 +59,11 @@ class RAGGenerator:
         prompt = SYSTEM_PROMPT_TEMPLATE.format(context_str=context_str)
         response = self.llm.invoke(
             [
-                {"role": "system", "content": prompt},
-                {"role": "user", "content": query},
+                SystemMessage(content=prompt),
+                HumanMessage(content=query),
             ]
         )
-        answer = response.content.strip()
+        answer = response.strip()
 
         if "couldn't find" in answer.lower():
             confidence = 0.0

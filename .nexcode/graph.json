@@ -1,0 +1,2554 @@
+{
+  "version": 1,
+  "generatedAt": "2026-06-29T03:53:44.843Z",
+  "workspaceRoot": "RAG",
+  "stats": {
+    "filesIndexed": 300,
+    "edgesIndexed": 4
+  },
+  "nodes": [
+    {
+      "id": "docker-compose.yml",
+      "path": "docker-compose.yml",
+      "lang": "yml",
+      "summary": "version: \"3.8\" services: backend: build: ./backend container_name: rag_backend restart: always",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "README.md",
+      "path": "README.md",
+      "lang": "md",
+      "summary": "# Enterprise RAG AI Document Search An enterprise-grade Retrieval-Augmented Generation (RAG) system that lets employees ask natural language questions against uploaded company documents (PDF, DOCX, TXT) and receive grounded answers with sou",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "render.yaml",
+      "path": "render.yaml",
+      "lang": "yaml",
+      "summary": "services: - type: web name: enterprise-rag-backend runtime: python rootDir: backend buildCommand: pip install -r requirements.txt",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/config.py",
+      "path": "backend/config.py",
+      "lang": "py",
+      "summary": "import os from pydantic_settings import BaseSettings, SettingsConfigDict class Settings(BaseSettings): model_config = SettingsConfigDict(env_file=\".env\", env_file_encoding=\"utf-8\") APP_NAME: str = \"Enterprise RAG AI Assistant\" GOOGLE_API_KE",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/database.py",
+      "path": "backend/database.py",
+      "lang": "py",
+      "summary": "import os import sqlite3 from config import settings def get_db_connection() -> sqlite3.Connection: os.makedirs(os.path.dirname(settings.SQLITE_DB_PATH), exist_ok=True) conn = sqlite3.connect(settings.SQLITE_DB_PATH)",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/main.py",
+      "path": "backend/main.py",
+      "lang": "py",
+      "summary": "import os import uuid from contextlib import asynccontextmanager import aiofiles from fastapi import FastAPI, File, HTTPException, UploadFile from fastapi.middleware.cors import CORSMiddleware",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "frontend/.eslintrc.json",
+      "path": "frontend/.eslintrc.json",
+      "lang": "json",
+      "summary": "{ \"extends\": [\"next/core-web-vitals\", \"next/typescript\"] }",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "frontend/components.json",
+      "path": "frontend/components.json",
+      "lang": "json",
+      "summary": "{ \"$schema\": \"https://ui.shadcn.com/schema.json\", \"style\": \"base-nova\", \"rsc\": true, \"tsx\": true, \"tailwind\": {",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "frontend/next-env.d.ts",
+      "path": "frontend/next-env.d.ts",
+      "lang": "ts",
+      "summary": "/// <reference types=\"next\" /> /// <reference types=\"next/image-types/global\" /> // NOTE: This file should not be edited // see https://nextjs.org/docs/app/building-your-application/configuring/typescript for more information.",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "frontend/package-lock.json",
+      "path": "frontend/package-lock.json",
+      "lang": "json",
+      "summary": "{ \"name\": \"frontend\", \"version\": \"0.1.0\", \"lockfileVersion\": 3, \"requires\": true, \"packages\": {",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "frontend/package.json",
+      "path": "frontend/package.json",
+      "lang": "json",
+      "summary": "{ \"name\": \"frontend\", \"version\": \"0.1.0\", \"private\": true, \"scripts\": { \"dev\": \"next dev\",",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "frontend/README.md",
+      "path": "frontend/README.md",
+      "lang": "md",
+      "summary": "This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app). ## Getting Started First, run the development server: ```bash npm run dev # or",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "frontend/tailwind.config.ts",
+      "path": "frontend/tailwind.config.ts",
+      "lang": "ts",
+      "summary": "import type { Config } from \"tailwindcss\"; const config: Config = { darkMode: [\"class\"], content: [ \"./src/pages/**/*.{js,ts,jsx,tsx,mdx}\", \"./src/components/**/*.{js,ts,jsx,tsx,mdx}\",",
+      "imports": [
+        "tailwindcss"
+      ],
+      "exports": []
+    },
+    {
+      "id": "frontend/tsconfig.json",
+      "path": "frontend/tsconfig.json",
+      "lang": "json",
+      "summary": "{ \"compilerOptions\": { \"lib\": [\"dom\", \"dom.iterable\", \"esnext\"], \"allowJs\": true, \"skipLibCheck\": true, \"strict\": true,",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "frontend/vercel.json",
+      "path": "frontend/vercel.json",
+      "lang": "json",
+      "summary": "{ \"framework\": \"nextjs\", \"buildCommand\": \"npm run build\", \"outputDirectory\": \".next\", \"installCommand\": \"npm install\" }",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/rag/generator.py",
+      "path": "backend/rag/generator.py",
+      "lang": "py",
+      "summary": "import json import time from langchain_google_genai import ChatGoogleGenerativeAI from config import settings from database import get_db_connection from rag.retriever import HybridRetriever",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/rag/ingestion.py",
+      "path": "backend/rag/ingestion.py",
+      "lang": "py",
+      "summary": "import os import uuid from pathlib import Path from langchain_text_splitters import RecursiveCharacterTextSplitter from langchain_community.document_loaders import Docx2txtLoader, PyPDFLoader, TextLoader from langchain_community.vectorstore",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/rag/retriever.py",
+      "path": "backend/rag/retriever.py",
+      "lang": "py",
+      "summary": "import os import re from langchain_community.vectorstores import Chroma from langchain_google_genai import GoogleGenerativeAIEmbeddings from rank_bm25 import BM25Okapi from config import settings",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/rag/__init__.py",
+      "path": "backend/rag/__init__.py",
+      "lang": "py",
+      "summary": "",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Scripts/Activate.ps1",
+      "path": "backend/venv/Scripts/Activate.ps1",
+      "lang": "ps1",
+      "summary": "<# .Synopsis Activate a Python virtual environment for the current PowerShell session. .Description Pushes the python executable for a virtual environment to the front of the $Env:PATH environment variable and sets the prompt to signify tha",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "frontend/src/app/globals.css",
+      "path": "frontend/src/app/globals.css",
+      "lang": "css",
+      "summary": "@import \"tw-animate-css\"; @import \"shadcn/tailwind.css\"; @tailwind base; @tailwind components; @tailwind utilities; :root {",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "frontend/src/app/layout.tsx",
+      "path": "frontend/src/app/layout.tsx",
+      "lang": "tsx",
+      "summary": "import type { Metadata } from \"next\"; import { Inter, JetBrains_Mono } from \"next/font/google\"; import \"./globals.css\"; const inter = Inter({ subsets: [\"latin\"], variable: \"--font-inter\",",
+      "imports": [
+        "next",
+        "next/font/google"
+      ],
+      "exports": [
+        "metadata",
+        "RootLayout"
+      ]
+    },
+    {
+      "id": "frontend/src/app/page.tsx",
+      "path": "frontend/src/app/page.tsx",
+      "lang": "tsx",
+      "summary": "\"use client\"; import { useState } from \"react\"; import { Sparkles } from \"lucide-react\"; import ChatContainer from \"@/components/chat/ChatContainer\"; import UploadModal from \"@/components/admin/UploadModal\"; import DocManager from \"@/compon",
+      "imports": [
+        "react",
+        "lucide-react",
+        "@/components/chat/ChatContainer",
+        "@/components/admin/UploadModal",
+        "@/components/admin/DocManager",
+        "@/components/admin/AnalyticsView"
+      ],
+      "exports": [
+        "Home"
+      ]
+    },
+    {
+      "id": "frontend/src/lib/api.ts",
+      "path": "frontend/src/lib/api.ts",
+      "lang": "ts",
+      "summary": "const BASE = process.env.NEXT_PUBLIC_API_URL || \"http://localhost:8000/api/v1\"; export async function queryRAG(query: string, sessionId: string) { try { const res = await fetch(`${BASE}/chat/query`, { method: \"POST\", headers: { \"Content-Typ",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "frontend/src/lib/utils.ts",
+      "path": "frontend/src/lib/utils.ts",
+      "lang": "ts",
+      "summary": "import { clsx, type ClassValue } from \"clsx\" import { twMerge } from \"tailwind-merge\" export function cn(...inputs: ClassValue[]) { return twMerge(clsx(inputs)) }",
+      "imports": [
+        "clsx",
+        "tailwind-merge"
+      ],
+      "exports": [
+        "cn"
+      ]
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/google_auth_httplib2.py",
+      "path": "backend/venv/Lib/site-packages/google_auth_httplib2.py",
+      "lang": "py",
+      "summary": "# Copyright 2016 Google Inc. # # Licensed under the Apache License, Version 2.0 (the \"License\"); # you may not use this file except in compliance with the License. # You may obtain a copy of the License at #",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/jsonpatch.py",
+      "path": "backend/venv/Lib/site-packages/jsonpatch.py",
+      "lang": "py",
+      "summary": "# -*- coding: utf-8 -*- # # python-json-patch - An implementation of the JSON Patch format # https://github.com/stefankoegl/python-json-patch # # Copyright (c) 2011 Stefan Kögl <stefan@skoegl.net>",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/jsonpointer.py",
+      "path": "backend/venv/Lib/site-packages/jsonpointer.py",
+      "lang": "py",
+      "summary": "# python-json-pointer - An implementation of the JSON Pointer syntax # https://github.com/stefankoegl/python-json-pointer # # Copyright (c) 2011 Stefan Kögl <stefan@skoegl.net> # All rights reserved. #",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/rank_bm25.py",
+      "path": "backend/venv/Lib/site-packages/rank_bm25.py",
+      "lang": "py",
+      "summary": "#!/usr/bin/env python import math import numpy as np from multiprocessing import Pool, cpu_count \"\"\" All of these algorithms have been taken from the paper:",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/six.py",
+      "path": "backend/venv/Lib/site-packages/six.py",
+      "lang": "py",
+      "summary": "# Copyright (c) 2010-2024 Benjamin Peterson # # Permission is hereby granted, free of charge, to any person obtaining a copy # of this software and associated documentation files (the \"Software\"), to deal # in the Software without restricti",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/typing_extensions.py",
+      "path": "backend/venv/Lib/site-packages/typing_extensions.py",
+      "lang": "py",
+      "summary": "import abc import builtins import collections import collections.abc import contextlib import enum",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "frontend/src/components/admin/AnalyticsView.tsx",
+      "path": "frontend/src/components/admin/AnalyticsView.tsx",
+      "lang": "tsx",
+      "summary": "\"use client\"; import { useCallback, useEffect, useState } from \"react\"; import { BarChart3, Clock, Loader2, Search } from \"lucide-react\"; import { Card, CardContent,",
+      "imports": [
+        "react",
+        "lucide-react",
+        "@/lib/api",
+        "@/components/ui/card"
+      ],
+      "exports": [
+        "AnalyticsView"
+      ]
+    },
+    {
+      "id": "frontend/src/components/admin/DocManager.tsx",
+      "path": "frontend/src/components/admin/DocManager.tsx",
+      "lang": "tsx",
+      "summary": "\"use client\"; import { useCallback, useEffect, useState } from \"react\"; import { Loader2, RefreshCw, Trash2 } from \"lucide-react\"; import { Badge } from \"@/components/ui/badge\"; import { Button } from \"@/components/ui/button\"; import {",
+      "imports": [
+        "react",
+        "lucide-react",
+        "@/components/ui/badge",
+        "@/components/ui/button",
+        "@/lib/api",
+        "@/components/ui/card",
+        "@/components/ui/dialog"
+      ],
+      "exports": [
+        "DocManager"
+      ]
+    },
+    {
+      "id": "frontend/src/components/admin/UploadModal.tsx",
+      "path": "frontend/src/components/admin/UploadModal.tsx",
+      "lang": "tsx",
+      "summary": "\"use client\"; import { useCallback, useRef, useState } from \"react\"; import { CheckCircle, Loader2, Upload, XCircle } from \"lucide-react\"; import { Button } from \"@/components/ui/button\"; import { Dialog,",
+      "imports": [
+        "react",
+        "lucide-react",
+        "@/components/ui/button",
+        "@/components/ui/progress",
+        "@/lib/api",
+        "@/components/ui/dialog"
+      ],
+      "exports": [
+        "UploadModal"
+      ]
+    },
+    {
+      "id": "frontend/src/components/chat/ChatContainer.tsx",
+      "path": "frontend/src/components/chat/ChatContainer.tsx",
+      "lang": "tsx",
+      "summary": "\"use client\"; import { useCallback, useEffect, useRef, useState } from \"react\"; import { MessageSquare } from \"lucide-react\"; import { queryRAG } from \"@/lib/api\"; import ChatInput from \"./ChatInput\"; import MessageBubble, { type Source } f",
+      "imports": [
+        "react",
+        "lucide-react",
+        "@/lib/api",
+        "./ChatInput",
+        "./MessageBubble"
+      ],
+      "exports": [
+        "ChatContainer"
+      ]
+    },
+    {
+      "id": "frontend/src/components/chat/ChatInput.tsx",
+      "path": "frontend/src/components/chat/ChatInput.tsx",
+      "lang": "tsx",
+      "summary": "\"use client\"; import { useCallback, useEffect, useRef } from \"react\"; import { Loader2, Send } from \"lucide-react\"; import { Button } from \"@/components/ui/button\"; import { Textarea } from \"@/components/ui/textarea\"; interface ChatInputPro",
+      "imports": [
+        "react",
+        "lucide-react",
+        "@/components/ui/button",
+        "@/components/ui/textarea"
+      ],
+      "exports": [
+        "ChatInput"
+      ]
+    },
+    {
+      "id": "frontend/src/components/chat/CitationModal.tsx",
+      "path": "frontend/src/components/chat/CitationModal.tsx",
+      "lang": "tsx",
+      "summary": "\"use client\"; import { Dialog, DialogContent, DialogHeader, DialogTitle,",
+      "imports": [
+        "@/components/ui/progress",
+        "@/components/ui/button",
+        "./MessageBubble",
+        "@/components/ui/dialog"
+      ],
+      "exports": [
+        "CitationModal"
+      ]
+    },
+    {
+      "id": "frontend/src/components/chat/MessageBubble.tsx",
+      "path": "frontend/src/components/chat/MessageBubble.tsx",
+      "lang": "tsx",
+      "summary": "\"use client\"; import { useState } from \"react\"; import { Badge } from \"@/components/ui/badge\"; import CitationModal from \"./CitationModal\"; export interface Source { filename: string;",
+      "imports": [
+        "react",
+        "@/components/ui/badge",
+        "./CitationModal"
+      ],
+      "exports": [
+        "MessageBubble"
+      ]
+    },
+    {
+      "id": "frontend/src/components/ui/badge.tsx",
+      "path": "frontend/src/components/ui/badge.tsx",
+      "lang": "tsx",
+      "summary": "import { mergeProps } from \"@base-ui/react/merge-props\" import { useRender } from \"@base-ui/react/use-render\" import { cva, type VariantProps } from \"class-variance-authority\" import { cn } from \"@/lib/utils\" const badgeVariants = cva( \"gro",
+      "imports": [
+        "@base-ui/react/merge-props",
+        "@base-ui/react/use-render",
+        "class-variance-authority",
+        "@/lib/utils"
+      ],
+      "exports": []
+    },
+    {
+      "id": "frontend/src/components/ui/button.tsx",
+      "path": "frontend/src/components/ui/button.tsx",
+      "lang": "tsx",
+      "summary": "import { Button as ButtonPrimitive } from \"@base-ui/react/button\" import { cva, type VariantProps } from \"class-variance-authority\" import { cn } from \"@/lib/utils\" const buttonVariants = cva( \"group/button inline-flex shrink-0 items-center",
+      "imports": [
+        "@base-ui/react/button",
+        "class-variance-authority",
+        "@/lib/utils"
+      ],
+      "exports": []
+    },
+    {
+      "id": "frontend/src/components/ui/card.tsx",
+      "path": "frontend/src/components/ui/card.tsx",
+      "lang": "tsx",
+      "summary": "import * as React from \"react\" import { cn } from \"@/lib/utils\" function Card({ className, size = \"default\", ...props",
+      "imports": [
+        "react",
+        "@/lib/utils"
+      ],
+      "exports": []
+    },
+    {
+      "id": "frontend/src/components/ui/dialog.tsx",
+      "path": "frontend/src/components/ui/dialog.tsx",
+      "lang": "tsx",
+      "summary": "\"use client\" import * as React from \"react\" import { Dialog as DialogPrimitive } from \"@base-ui/react/dialog\" import { cn } from \"@/lib/utils\" import { Button } from \"@/components/ui/button\" import { XIcon } from \"lucide-react\"",
+      "imports": [
+        "react",
+        "@base-ui/react/dialog",
+        "@/lib/utils",
+        "@/components/ui/button",
+        "lucide-react"
+      ],
+      "exports": []
+    },
+    {
+      "id": "frontend/src/components/ui/input.tsx",
+      "path": "frontend/src/components/ui/input.tsx",
+      "lang": "tsx",
+      "summary": "import * as React from \"react\" import { Input as InputPrimitive } from \"@base-ui/react/input\" import { cn } from \"@/lib/utils\" function Input({ className, type, ...props }: React.ComponentProps<\"input\">) { return ( <InputPrimitive",
+      "imports": [
+        "react",
+        "@base-ui/react/input",
+        "@/lib/utils"
+      ],
+      "exports": []
+    },
+    {
+      "id": "frontend/src/components/ui/progress.tsx",
+      "path": "frontend/src/components/ui/progress.tsx",
+      "lang": "tsx",
+      "summary": "\"use client\" import { Progress as ProgressPrimitive } from \"@base-ui/react/progress\" import { cn } from \"@/lib/utils\" function Progress({ className, children,",
+      "imports": [
+        "@base-ui/react/progress",
+        "@/lib/utils"
+      ],
+      "exports": []
+    },
+    {
+      "id": "frontend/src/components/ui/tabs.tsx",
+      "path": "frontend/src/components/ui/tabs.tsx",
+      "lang": "tsx",
+      "summary": "\"use client\" import { Tabs as TabsPrimitive } from \"@base-ui/react/tabs\" import { cva, type VariantProps } from \"class-variance-authority\" import { cn } from \"@/lib/utils\" function Tabs({ className,",
+      "imports": [
+        "@base-ui/react/tabs",
+        "class-variance-authority",
+        "@/lib/utils"
+      ],
+      "exports": []
+    },
+    {
+      "id": "frontend/src/components/ui/textarea.tsx",
+      "path": "frontend/src/components/ui/textarea.tsx",
+      "lang": "tsx",
+      "summary": "import * as React from \"react\" import { cn } from \"@/lib/utils\" function Textarea({ className, ...props }: React.ComponentProps<\"textarea\">) { return ( <textarea data-slot=\"textarea\"",
+      "imports": [
+        "react",
+        "@/lib/utils"
+      ],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/aiofiles/base.py",
+      "path": "backend/venv/Lib/site-packages/aiofiles/base.py",
+      "lang": "py",
+      "summary": "from asyncio import get_running_loop from collections.abc import Awaitable from contextlib import AbstractAsyncContextManager from functools import partial, wraps def wrap(func): @wraps(func)",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/aiofiles/os.py",
+      "path": "backend/venv/Lib/site-packages/aiofiles/os.py",
+      "lang": "py",
+      "summary": "\"\"\"Async executor versions of file functions from the os module.\"\"\" import os from . import ospath as path from .base import wrap __all__ = [ \"path\",",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/aiofiles/ospath.py",
+      "path": "backend/venv/Lib/site-packages/aiofiles/ospath.py",
+      "lang": "py",
+      "summary": "\"\"\"Async executor versions of file functions from the os.path module.\"\"\" from os import path from .base import wrap __all__ = [ \"abspath\", \"getatime\",",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/aiofiles/__init__.py",
+      "path": "backend/venv/Lib/site-packages/aiofiles/__init__.py",
+      "lang": "py",
+      "summary": "\"\"\"Utilities for asyncio-friendly file handling.\"\"\" from . import tempfile from .threadpool import ( open, stderr, stderr_bytes,",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/aiohappyeyeballs/impl.py",
+      "path": "backend/venv/Lib/site-packages/aiohappyeyeballs/impl.py",
+      "lang": "py",
+      "summary": "\"\"\"Base implementation.\"\"\" import asyncio import collections import contextlib import functools import itertools",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/aiohappyeyeballs/types.py",
+      "path": "backend/venv/Lib/site-packages/aiohappyeyeballs/types.py",
+      "lang": "py",
+      "summary": "\"\"\"Types for aiohappyeyeballs.\"\"\" import socket from collections.abc import Callable AddrInfoType = tuple[ int | socket.AddressFamily, int | socket.SocketKind,",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/aiohappyeyeballs/utils.py",
+      "path": "backend/venv/Lib/site-packages/aiohappyeyeballs/utils.py",
+      "lang": "py",
+      "summary": "\"\"\"Utility functions for aiohappyeyeballs.\"\"\" import ipaddress import socket from .types import AddrInfoType def addr_to_addr_infos( addr: tuple[str, int, int, int] | tuple[str, int, int] | tuple[str, int] | None,",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/aiohappyeyeballs/_staggered.py",
+      "path": "backend/venv/Lib/site-packages/aiohappyeyeballs/_staggered.py",
+      "lang": "py",
+      "summary": "import asyncio import contextlib from collections.abc import Awaitable, Callable, Iterable from typing import ( TYPE_CHECKING, Any,",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/aiohappyeyeballs/__init__.py",
+      "path": "backend/venv/Lib/site-packages/aiohappyeyeballs/__init__.py",
+      "lang": "py",
+      "summary": "__version__ = \"2.6.2\" from .impl import start_connection from .types import AddrInfoType, SocketFactoryType from .utils import addr_to_addr_infos, pop_addr_infos_interleave, remove_addr_infos __all__ = ( \"AddrInfoType\",",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/aiohttp/abc.py",
+      "path": "backend/venv/Lib/site-packages/aiohttp/abc.py",
+      "lang": "py",
+      "summary": "import asyncio import logging import socket from abc import ABC, abstractmethod from collections.abc import Awaitable, Callable, Generator, Iterable, Sequence, Sized from http.cookies import BaseCookie, Morsel, SimpleCookie",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/aiohttp/base_protocol.py",
+      "path": "backend/venv/Lib/site-packages/aiohttp/base_protocol.py",
+      "lang": "py",
+      "summary": "import asyncio from typing import TYPE_CHECKING, Any, cast from .client_exceptions import ClientConnectionResetError from .helpers import set_exception from .tcp_helpers import tcp_nodelay if TYPE_CHECKING:",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/aiohttp/client.py",
+      "path": "backend/venv/Lib/site-packages/aiohttp/client.py",
+      "lang": "py",
+      "summary": "\"\"\"HTTP Client for asyncio.\"\"\" import asyncio import base64 import hashlib import json import os",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/aiohttp/client_exceptions.py",
+      "path": "backend/venv/Lib/site-packages/aiohttp/client_exceptions.py",
+      "lang": "py",
+      "summary": "\"\"\"HTTP related errors.\"\"\" import asyncio import warnings from typing import TYPE_CHECKING, Union from multidict import MultiMapping from .typedefs import StrOrURL",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/aiohttp/client_middlewares.py",
+      "path": "backend/venv/Lib/site-packages/aiohttp/client_middlewares.py",
+      "lang": "py",
+      "summary": "\"\"\"Client middleware support.\"\"\" from collections.abc import Awaitable, Callable, Sequence from .client_reqrep import ClientRequest, ClientResponse __all__ = (\"ClientMiddlewareType\", \"ClientHandlerType\", \"build_client_middlewares\") # Type a",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/aiohttp/client_middleware_digest_auth.py",
+      "path": "backend/venv/Lib/site-packages/aiohttp/client_middleware_digest_auth.py",
+      "lang": "py",
+      "summary": "\"\"\" Digest authentication middleware for aiohttp client. This middleware implements HTTP Digest Authentication according to RFC 7616, providing a more secure alternative to Basic Authentication. It supports all standard hash algorithms incl",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/aiohttp/client_proto.py",
+      "path": "backend/venv/Lib/site-packages/aiohttp/client_proto.py",
+      "lang": "py",
+      "summary": "import asyncio from contextlib import suppress from typing import Any, Callable from .base_protocol import BaseProtocol from .client_exceptions import ( ClientConnectionError,",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/aiohttp/client_reqrep.py",
+      "path": "backend/venv/Lib/site-packages/aiohttp/client_reqrep.py",
+      "lang": "py",
+      "summary": "import asyncio import codecs import contextlib import functools import io import re",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/aiohttp/client_ws.py",
+      "path": "backend/venv/Lib/site-packages/aiohttp/client_ws.py",
+      "lang": "py",
+      "summary": "\"\"\"WebSocket client for asyncio.\"\"\" import asyncio import sys from collections.abc import Callable from types import TracebackType from typing import Any, Generic, Literal, Optional, cast, overload",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/aiohttp/compression_utils.py",
+      "path": "backend/venv/Lib/site-packages/aiohttp/compression_utils.py",
+      "lang": "py",
+      "summary": "import asyncio import sys import zlib from abc import ABC, abstractmethod from concurrent.futures import Executor from typing import Any, Final, Protocol, TypedDict, cast",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/aiohttp/connector.py",
+      "path": "backend/venv/Lib/site-packages/aiohttp/connector.py",
+      "lang": "py",
+      "summary": "import asyncio import functools import random import socket import sys import traceback",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/aiohttp/cookiejar.py",
+      "path": "backend/venv/Lib/site-packages/aiohttp/cookiejar.py",
+      "lang": "py",
+      "summary": "import asyncio import calendar import contextlib import datetime import heapq import itertools",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/aiohttp/formdata.py",
+      "path": "backend/venv/Lib/site-packages/aiohttp/formdata.py",
+      "lang": "py",
+      "summary": "import io import warnings from collections.abc import Iterable from typing import Any from urllib.parse import urlencode from multidict import MultiDict, MultiDictProxy",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/aiohttp/hdrs.py",
+      "path": "backend/venv/Lib/site-packages/aiohttp/hdrs.py",
+      "lang": "py",
+      "summary": "\"\"\"HTTP Headers constants.\"\"\" # After changing the file content call ./tools/gen.py # to regenerate the headers parser import itertools from typing import Final from multidict import istr",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/aiohttp/helpers.py",
+      "path": "backend/venv/Lib/site-packages/aiohttp/helpers.py",
+      "lang": "py",
+      "summary": "\"\"\"Various helper functions\"\"\" import asyncio import base64 import binascii import contextlib import datetime",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/aiohttp/http.py",
+      "path": "backend/venv/Lib/site-packages/aiohttp/http.py",
+      "lang": "py",
+      "summary": "import sys from collections.abc import Mapping from http import HTTPStatus from . import __version__ from .http_exceptions import HttpProcessingError as HttpProcessingError from .http_parser import (",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/aiohttp/http_exceptions.py",
+      "path": "backend/venv/Lib/site-packages/aiohttp/http_exceptions.py",
+      "lang": "py",
+      "summary": "\"\"\"Low-level http related exceptions.\"\"\" from textwrap import indent from .typedefs import _CIMultiDict __all__ = (\"HttpProcessingError\",) class HttpProcessingError(Exception): \"\"\"HTTP error.",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/aiohttp/http_parser.py",
+      "path": "backend/venv/Lib/site-packages/aiohttp/http_parser.py",
+      "lang": "py",
+      "summary": "import abc import asyncio import re import string import sys from contextlib import suppress",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/aiohttp/http_websocket.py",
+      "path": "backend/venv/Lib/site-packages/aiohttp/http_websocket.py",
+      "lang": "py",
+      "summary": "\"\"\"WebSocket protocol versions 13 and 8.\"\"\" from ._websocket.helpers import WS_KEY, ws_ext_gen, ws_ext_parse from ._websocket.models import ( WS_CLOSED_MESSAGE, WS_CLOSING_MESSAGE, WebSocketError,",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/aiohttp/http_writer.py",
+      "path": "backend/venv/Lib/site-packages/aiohttp/http_writer.py",
+      "lang": "py",
+      "summary": "\"\"\"Http related parsers and protocol.\"\"\" import asyncio import re import sys from typing import ( # noqa TYPE_CHECKING,",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/aiohttp/log.py",
+      "path": "backend/venv/Lib/site-packages/aiohttp/log.py",
+      "lang": "py",
+      "summary": "import logging access_logger = logging.getLogger(\"aiohttp.access\") client_logger = logging.getLogger(\"aiohttp.client\") internal_logger = logging.getLogger(\"aiohttp.internal\") server_logger = logging.getLogger(\"aiohttp.server\") web_logger = ",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/aiohttp/multipart.py",
+      "path": "backend/venv/Lib/site-packages/aiohttp/multipart.py",
+      "lang": "py",
+      "summary": "import base64 import binascii import json import re import sys import uuid",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/aiohttp/payload.py",
+      "path": "backend/venv/Lib/site-packages/aiohttp/payload.py",
+      "lang": "py",
+      "summary": "import asyncio import enum import io import json import mimetypes import os",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/aiohttp/payload_streamer.py",
+      "path": "backend/venv/Lib/site-packages/aiohttp/payload_streamer.py",
+      "lang": "py",
+      "summary": "\"\"\" Payload implementation for coroutines as data provider. As a simple case, you can upload data from file:: @aiohttp.streamer async def file_sender(writer, file_name=None): with open(file_name, 'rb') as f:",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/aiohttp/pytest_plugin.py",
+      "path": "backend/venv/Lib/site-packages/aiohttp/pytest_plugin.py",
+      "lang": "py",
+      "summary": "import asyncio import contextlib import inspect import warnings from collections.abc import Awaitable, Callable, Iterator from typing import Any, Protocol, overload",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/aiohttp/resolver.py",
+      "path": "backend/venv/Lib/site-packages/aiohttp/resolver.py",
+      "lang": "py",
+      "summary": "import asyncio import socket import weakref from typing import Any, Final, Optional from .abc import AbstractResolver, ResolveResult __all__ = (\"ThreadedResolver\", \"AsyncResolver\", \"DefaultResolver\")",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/aiohttp/streams.py",
+      "path": "backend/venv/Lib/site-packages/aiohttp/streams.py",
+      "lang": "py",
+      "summary": "import asyncio import collections import sys import warnings from collections.abc import Awaitable, Callable from typing import Final, Generic, TypeVar",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/aiohttp/tcp_helpers.py",
+      "path": "backend/venv/Lib/site-packages/aiohttp/tcp_helpers.py",
+      "lang": "py",
+      "summary": "\"\"\"Helper methods to tune a TCP connection\"\"\" import asyncio import socket from contextlib import suppress from typing import Optional # noqa __all__ = (\"tcp_keepalive\", \"tcp_nodelay\")",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/aiohttp/test_utils.py",
+      "path": "backend/venv/Lib/site-packages/aiohttp/test_utils.py",
+      "lang": "py",
+      "summary": "\"\"\"Utilities shared by tests.\"\"\" import asyncio import contextlib import gc import inspect import ipaddress",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/aiohttp/tracing.py",
+      "path": "backend/venv/Lib/site-packages/aiohttp/tracing.py",
+      "lang": "py",
+      "summary": "from types import SimpleNamespace from typing import TYPE_CHECKING, Any, TypeVar import attr from aiosignal import Signal from multidict import CIMultiDict from yarl import URL",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/aiohttp/typedefs.py",
+      "path": "backend/venv/Lib/site-packages/aiohttp/typedefs.py",
+      "lang": "py",
+      "summary": "import json import os from collections.abc import Awaitable, Callable, Iterable, Mapping from typing import TYPE_CHECKING, Any, Protocol, Union from multidict import CIMultiDict, CIMultiDictProxy, MultiDict, MultiDictProxy, istr from yarl i",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/aiohttp/web.py",
+      "path": "backend/venv/Lib/site-packages/aiohttp/web.py",
+      "lang": "py",
+      "summary": "import asyncio import logging import os import socket import sys import warnings",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/aiohttp/web_app.py",
+      "path": "backend/venv/Lib/site-packages/aiohttp/web_app.py",
+      "lang": "py",
+      "summary": "import asyncio import logging import warnings from collections.abc import ( AsyncIterator, Awaitable,",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/aiohttp/web_exceptions.py",
+      "path": "backend/venv/Lib/site-packages/aiohttp/web_exceptions.py",
+      "lang": "py",
+      "summary": "import warnings from typing import Any, Dict, Iterable, List, Optional, Set # noqa from yarl import URL from .typedefs import LooseHeaders, StrOrURL from .web_response import Response __all__ = (",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/aiohttp/web_fileresponse.py",
+      "path": "backend/venv/Lib/site-packages/aiohttp/web_fileresponse.py",
+      "lang": "py",
+      "summary": "import asyncio import io import os import pathlib import sys from contextlib import suppress",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/aiohttp/web_log.py",
+      "path": "backend/venv/Lib/site-packages/aiohttp/web_log.py",
+      "lang": "py",
+      "summary": "import datetime import functools import logging import os import re import time as time_mod",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/aiohttp/web_middlewares.py",
+      "path": "backend/venv/Lib/site-packages/aiohttp/web_middlewares.py",
+      "lang": "py",
+      "summary": "import re from typing import TYPE_CHECKING, TypeVar from .typedefs import Handler, Middleware from .web_exceptions import HTTPMove, HTTPPermanentRedirect from .web_request import Request from .web_response import StreamResponse",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/aiohttp/web_protocol.py",
+      "path": "backend/venv/Lib/site-packages/aiohttp/web_protocol.py",
+      "lang": "py",
+      "summary": "import asyncio import asyncio.streams import sys import traceback import warnings from collections import deque",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/aiohttp/web_request.py",
+      "path": "backend/venv/Lib/site-packages/aiohttp/web_request.py",
+      "lang": "py",
+      "summary": "import asyncio import datetime import io import re import string import tempfile",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/aiohttp/web_response.py",
+      "path": "backend/venv/Lib/site-packages/aiohttp/web_response.py",
+      "lang": "py",
+      "summary": "import asyncio import collections.abc import datetime import enum import json import math",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/aiohttp/web_routedef.py",
+      "path": "backend/venv/Lib/site-packages/aiohttp/web_routedef.py",
+      "lang": "py",
+      "summary": "import abc import os # noqa from collections.abc import Callable, Iterator, Sequence from typing import TYPE_CHECKING, Any, Union, overload import attr from . import hdrs",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/aiohttp/web_runner.py",
+      "path": "backend/venv/Lib/site-packages/aiohttp/web_runner.py",
+      "lang": "py",
+      "summary": "import asyncio import signal import socket import warnings from abc import ABC, abstractmethod from typing import TYPE_CHECKING, Any",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/aiohttp/web_server.py",
+      "path": "backend/venv/Lib/site-packages/aiohttp/web_server.py",
+      "lang": "py",
+      "summary": "\"\"\"Low level HTTP server.\"\"\" import asyncio from typing import Any, Awaitable, Callable, Dict, List, Optional # noqa from .abc import AbstractStreamWriter from .http_parser import RawRequestMessage from .streams import StreamReader",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/aiohttp/web_urldispatcher.py",
+      "path": "backend/venv/Lib/site-packages/aiohttp/web_urldispatcher.py",
+      "lang": "py",
+      "summary": "import abc import asyncio import base64 import functools import hashlib import html",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/aiohttp/web_ws.py",
+      "path": "backend/venv/Lib/site-packages/aiohttp/web_ws.py",
+      "lang": "py",
+      "summary": "import asyncio import base64 import binascii import hashlib import json import sys",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/aiohttp/worker.py",
+      "path": "backend/venv/Lib/site-packages/aiohttp/worker.py",
+      "lang": "py",
+      "summary": "\"\"\"Async gunicorn worker for aiohttp.web\"\"\" import asyncio import inspect import os import re import signal",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/aiohttp/_cookie_helpers.py",
+      "path": "backend/venv/Lib/site-packages/aiohttp/_cookie_helpers.py",
+      "lang": "py",
+      "summary": "\"\"\" Internal cookie handling helpers. This module contains internal utilities for cookie parsing and manipulation. These are not part of the public API and may change without notice. \"\"\" import re",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/aiohttp/__init__.py",
+      "path": "backend/venv/Lib/site-packages/aiohttp/__init__.py",
+      "lang": "py",
+      "summary": "__version__ = \"3.14.1\" from typing import TYPE_CHECKING from . import hdrs as hdrs from .client import ( BaseConnector, ClientConnectionError,",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/aiosignal/__init__.py",
+      "path": "backend/venv/Lib/site-packages/aiosignal/__init__.py",
+      "lang": "py",
+      "summary": "import sys from typing import Any, Awaitable, Callable, TypeVar from frozenlist import FrozenList if sys.version_info >= (3, 11): from typing import Unpack else:",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/annotated_doc/main.py",
+      "path": "backend/venv/Lib/site-packages/annotated_doc/main.py",
+      "lang": "py",
+      "summary": "class Doc: \"\"\"Define the documentation of a type annotation using `Annotated`, to be used in class attributes, function and method parameters, return values, and variables. The value should be a positional-only string literal to allow stati",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/annotated_doc/__init__.py",
+      "path": "backend/venv/Lib/site-packages/annotated_doc/__init__.py",
+      "lang": "py",
+      "summary": "from .main import Doc as Doc __version__ = \"0.0.4\"",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/annotated_types/test_cases.py",
+      "path": "backend/venv/Lib/site-packages/annotated_types/test_cases.py",
+      "lang": "py",
+      "summary": "import math import sys from datetime import date, datetime, timedelta, timezone from decimal import Decimal from typing import Any, Dict, Iterable, Iterator, List, NamedTuple, Set, Tuple if sys.version_info < (3, 9):",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/annotated_types/__init__.py",
+      "path": "backend/venv/Lib/site-packages/annotated_types/__init__.py",
+      "lang": "py",
+      "summary": "import math import sys import types from dataclasses import dataclass from datetime import tzinfo from typing import TYPE_CHECKING, Any, Callable, Iterator, Optional, SupportsFloat, SupportsIndex, TypeVar, Union",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/anyio/from_thread.py",
+      "path": "backend/venv/Lib/site-packages/anyio/from_thread.py",
+      "lang": "py",
+      "summary": "from __future__ import annotations __all__ = ( \"BlockingPortal\", \"BlockingPortalProvider\", \"check_cancelled\", \"run\",",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/anyio/functools.py",
+      "path": "backend/venv/Lib/site-packages/anyio/functools.py",
+      "lang": "py",
+      "summary": "from __future__ import annotations __all__ = ( \"AsyncCacheInfo\", \"AsyncCacheParameters\", \"AsyncLRUCacheWrapper\", \"cache\",",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/anyio/itertools.py",
+      "path": "backend/venv/Lib/site-packages/anyio/itertools.py",
+      "lang": "py",
+      "summary": "from __future__ import annotations __all__ = ( \"accumulate\", \"batched\", \"Chain\", \"combinations\",",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/anyio/lowlevel.py",
+      "path": "backend/venv/Lib/site-packages/anyio/lowlevel.py",
+      "lang": "py",
+      "summary": "from __future__ import annotations __all__ = ( \"EventLoopToken\", \"RunvarToken\", \"RunVar\", \"checkpoint\",",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/anyio/pytest_plugin.py",
+      "path": "backend/venv/Lib/site-packages/anyio/pytest_plugin.py",
+      "lang": "py",
+      "summary": "from __future__ import annotations import dataclasses import socket import sys from collections.abc import Callable, Generator, Iterator from contextlib import ExitStack, contextmanager",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/anyio/to_interpreter.py",
+      "path": "backend/venv/Lib/site-packages/anyio/to_interpreter.py",
+      "lang": "py",
+      "summary": "from __future__ import annotations __all__ = ( \"run_sync\", \"current_default_interpreter_limiter\", ) import atexit",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/anyio/to_process.py",
+      "path": "backend/venv/Lib/site-packages/anyio/to_process.py",
+      "lang": "py",
+      "summary": "from __future__ import annotations __all__ = ( \"current_default_process_limiter\", \"process_worker\", \"run_sync\", )",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/anyio/to_thread.py",
+      "path": "backend/venv/Lib/site-packages/anyio/to_thread.py",
+      "lang": "py",
+      "summary": "from __future__ import annotations __all__ = ( \"run_sync\", \"current_default_thread_limiter\", ) import sys",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/anyio/__init__.py",
+      "path": "backend/venv/Lib/site-packages/anyio/__init__.py",
+      "lang": "py",
+      "summary": "from __future__ import annotations from ._core._contextmanagers import AsyncContextManagerMixin as AsyncContextManagerMixin from ._core._contextmanagers import ContextManagerMixin as ContextManagerMixin from ._core._eventloop import current",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/anyio-4.14.1.dist-info/scm_file_list.json",
+      "path": "backend/venv/Lib/site-packages/anyio-4.14.1.dist-info/scm_file_list.json",
+      "lang": "json",
+      "summary": "{ \"files\": [ \".pre-commit-config.yaml\", \"LICENSE\", \"pyproject.toml\", \"AGENTS.md\",",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/anyio-4.14.1.dist-info/scm_version.json",
+      "path": "backend/venv/Lib/site-packages/anyio-4.14.1.dist-info/scm_version.json",
+      "lang": "json",
+      "summary": "{ \"tag\": \"4.14.1\", \"distance\": 0, \"node\": \"g149b9e907618fadf6840a4d3cebad533b0c7d033\", \"dirty\": false, \"branch\": \"HEAD\",",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/apiclient/__init__.py",
+      "path": "backend/venv/Lib/site-packages/apiclient/__init__.py",
+      "lang": "py",
+      "summary": "\"\"\"Retain apiclient as an alias for googleapiclient.\"\"\" from googleapiclient import channel, discovery, errors, http, mimeparse, model try: from googleapiclient import sample_tools except ImportError: # Silently ignore, because the vast maj",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/attr/converters.py",
+      "path": "backend/venv/Lib/site-packages/attr/converters.py",
+      "lang": "py",
+      "summary": "# SPDX-License-Identifier: MIT \"\"\" Commonly useful converters. \"\"\" import typing from ._compat import _AnnotationExtractor",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/attr/exceptions.py",
+      "path": "backend/venv/Lib/site-packages/attr/exceptions.py",
+      "lang": "py",
+      "summary": "# SPDX-License-Identifier: MIT from __future__ import annotations class FrozenError(AttributeError): \"\"\" A frozen/immutable instance or attribute have been attempted to be modified.",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/attr/filters.py",
+      "path": "backend/venv/Lib/site-packages/attr/filters.py",
+      "lang": "py",
+      "summary": "# SPDX-License-Identifier: MIT \"\"\" Commonly useful filters for `attrs.asdict` and `attrs.astuple`. \"\"\" from ._make import Attribute def _split_what(what):",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/attr/setters.py",
+      "path": "backend/venv/Lib/site-packages/attr/setters.py",
+      "lang": "py",
+      "summary": "# SPDX-License-Identifier: MIT \"\"\" Commonly used hooks for on_setattr. \"\"\" from . import _config from .exceptions import FrozenAttributeError",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/attr/validators.py",
+      "path": "backend/venv/Lib/site-packages/attr/validators.py",
+      "lang": "py",
+      "summary": "# SPDX-License-Identifier: MIT \"\"\" Commonly useful validators. \"\"\" import operator import re",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/attr/_cmp.py",
+      "path": "backend/venv/Lib/site-packages/attr/_cmp.py",
+      "lang": "py",
+      "summary": "# SPDX-License-Identifier: MIT import functools import types from ._make import __ne__ _operation_names = {\"eq\": \"==\", \"lt\": \"<\", \"le\": \"<=\", \"gt\": \">\", \"ge\": \">=\"} def cmp_using(",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/attr/_compat.py",
+      "path": "backend/venv/Lib/site-packages/attr/_compat.py",
+      "lang": "py",
+      "summary": "# SPDX-License-Identifier: MIT import inspect import platform import sys import threading from collections.abc import Mapping, Sequence # noqa: F401",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/attr/_config.py",
+      "path": "backend/venv/Lib/site-packages/attr/_config.py",
+      "lang": "py",
+      "summary": "# SPDX-License-Identifier: MIT __all__ = [\"get_run_validators\", \"set_run_validators\"] _run_validators = True def set_run_validators(run): \"\"\" Set whether or not validators are run. By default, they are run.",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/attr/_funcs.py",
+      "path": "backend/venv/Lib/site-packages/attr/_funcs.py",
+      "lang": "py",
+      "summary": "# SPDX-License-Identifier: MIT import copy from ._compat import get_generic_base from ._make import _OBJ_SETATTR, NOTHING, fields from .exceptions import AttrsAttributeNotFoundError _ATOMIC_TYPES = frozenset(",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/attr/_make.py",
+      "path": "backend/venv/Lib/site-packages/attr/_make.py",
+      "lang": "py",
+      "summary": "# SPDX-License-Identifier: MIT from __future__ import annotations import abc import contextlib import copy import enum",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/attr/_next_gen.py",
+      "path": "backend/venv/Lib/site-packages/attr/_next_gen.py",
+      "lang": "py",
+      "summary": "# SPDX-License-Identifier: MIT \"\"\" These are keyword-only APIs that call `attr.s` and `attr.ib` with different default values. \"\"\" from functools import partial",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/attr/_version_info.py",
+      "path": "backend/venv/Lib/site-packages/attr/_version_info.py",
+      "lang": "py",
+      "summary": "# SPDX-License-Identifier: MIT from functools import total_ordering from ._funcs import astuple from ._make import attrib, attrs @total_ordering @attrs(eq=False, order=False, slots=True, frozen=True)",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/attr/__init__.py",
+      "path": "backend/venv/Lib/site-packages/attr/__init__.py",
+      "lang": "py",
+      "summary": "# SPDX-License-Identifier: MIT \"\"\" Classes Without Boilerplate \"\"\" from functools import partial from typing import Callable, Literal, Protocol",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/attrs/converters.py",
+      "path": "backend/venv/Lib/site-packages/attrs/converters.py",
+      "lang": "py",
+      "summary": "# SPDX-License-Identifier: MIT from attr.converters import * # noqa: F403",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/attrs/exceptions.py",
+      "path": "backend/venv/Lib/site-packages/attrs/exceptions.py",
+      "lang": "py",
+      "summary": "# SPDX-License-Identifier: MIT from attr.exceptions import * # noqa: F403",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/attrs/filters.py",
+      "path": "backend/venv/Lib/site-packages/attrs/filters.py",
+      "lang": "py",
+      "summary": "# SPDX-License-Identifier: MIT from attr.filters import * # noqa: F403",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/attrs/setters.py",
+      "path": "backend/venv/Lib/site-packages/attrs/setters.py",
+      "lang": "py",
+      "summary": "# SPDX-License-Identifier: MIT from attr.setters import * # noqa: F403",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/attrs/validators.py",
+      "path": "backend/venv/Lib/site-packages/attrs/validators.py",
+      "lang": "py",
+      "summary": "# SPDX-License-Identifier: MIT from attr.validators import * # noqa: F403",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/attrs/__init__.py",
+      "path": "backend/venv/Lib/site-packages/attrs/__init__.py",
+      "lang": "py",
+      "summary": "# SPDX-License-Identifier: MIT from attr import ( NOTHING, Attribute, AttrsInstance, Converter,",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/bcrypt/__init__.py",
+      "path": "backend/venv/Lib/site-packages/bcrypt/__init__.py",
+      "lang": "py",
+      "summary": "# Licensed under the Apache License, Version 2.0 (the \"License\"); # you may not use this file except in compliance with the License. # You may obtain a copy of the License at # # http://www.apache.org/licenses/LICENSE-2.0 #",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/certifi/core.py",
+      "path": "backend/venv/Lib/site-packages/certifi/core.py",
+      "lang": "py",
+      "summary": "\"\"\" certifi.py ~~~~~~~~~~ This module returns the installation location of cacert.pem or its contents. \"\"\" import sys",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/certifi/__init__.py",
+      "path": "backend/venv/Lib/site-packages/certifi/__init__.py",
+      "lang": "py",
+      "summary": "from .core import contents, where __all__ = [\"contents\", \"where\"] __version__ = \"2026.06.17\"",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/certifi/__main__.py",
+      "path": "backend/venv/Lib/site-packages/certifi/__main__.py",
+      "lang": "py",
+      "summary": "import argparse from certifi import contents, where parser = argparse.ArgumentParser() parser.add_argument(\"-c\", \"--contents\", action=\"store_true\") args = parser.parse_args() if args.contents:",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/cffi/api.py",
+      "path": "backend/venv/Lib/site-packages/cffi/api.py",
+      "lang": "py",
+      "summary": "import sys, types from .lock import allocate_lock from .error import CDefError from . import model try: callable",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/cffi/backend_ctypes.py",
+      "path": "backend/venv/Lib/site-packages/cffi/backend_ctypes.py",
+      "lang": "py",
+      "summary": "import ctypes, ctypes.util, operator, sys from . import model if sys.version_info < (3,): bytechr = chr else: unicode = str",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/cffi/cffi_opcode.py",
+      "path": "backend/venv/Lib/site-packages/cffi/cffi_opcode.py",
+      "lang": "py",
+      "summary": "from .error import VerificationError class CffiOp(object): def __init__(self, op, arg): self.op = op self.arg = arg def as_c_expr(self):",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/cffi/commontypes.py",
+      "path": "backend/venv/Lib/site-packages/cffi/commontypes.py",
+      "lang": "py",
+      "summary": "import sys from . import model from .error import FFIError COMMON_TYPES = {} try: # fetch \"bool\" and all simple Windows types",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/cffi/cparser.py",
+      "path": "backend/venv/Lib/site-packages/cffi/cparser.py",
+      "lang": "py",
+      "summary": "from . import model from .commontypes import COMMON_TYPES, resolve_common_type from .error import FFIError, CDefError try: from . import _pycparser as pycparser except ImportError:",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/cffi/error.py",
+      "path": "backend/venv/Lib/site-packages/cffi/error.py",
+      "lang": "py",
+      "summary": "class FFIError(Exception): __module__ = 'cffi' class CDefError(Exception): __module__ = 'cffi' def __str__(self): try:",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/cffi/ffiplatform.py",
+      "path": "backend/venv/Lib/site-packages/cffi/ffiplatform.py",
+      "lang": "py",
+      "summary": "import sys, os from .error import VerificationError LIST_OF_FILE_NAMES = ['sources', 'include_dirs', 'library_dirs', 'extra_objects', 'depends'] def get_extension(srcfilename, modname, sources=(), **kwds): from cffi._shimmed_dist_utils impo",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/cffi/lock.py",
+      "path": "backend/venv/Lib/site-packages/cffi/lock.py",
+      "lang": "py",
+      "summary": "import sys if sys.version_info < (3,): try: from thread import allocate_lock except ImportError: from dummy_thread import allocate_lock",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/cffi/model.py",
+      "path": "backend/venv/Lib/site-packages/cffi/model.py",
+      "lang": "py",
+      "summary": "import types import weakref from .lock import allocate_lock from .error import CDefError, VerificationError, VerificationMissing # type qualifiers Q_CONST = 0x01",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/cffi/parse_c_type.h",
+      "path": "backend/venv/Lib/site-packages/cffi/parse_c_type.h",
+      "lang": "h",
+      "summary": "/* This part is from file 'cffi/parse_c_type.h'. It is copied at the beginning of C sources generated by CFFI's ffi.set_source(). */ typedef void *_cffi_opcode_t; #define _CFFI_OP(opcode, arg) (_cffi_opcode_t)(opcode | (((uintptr_t)(arg)) <",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/cffi/pkgconfig.py",
+      "path": "backend/venv/Lib/site-packages/cffi/pkgconfig.py",
+      "lang": "py",
+      "summary": "# pkg-config, https://www.freedesktop.org/wiki/Software/pkg-config/ integration for cffi import sys, os, subprocess from .error import PkgConfigError def merge_flags(cfg1, cfg2): \"\"\"Merge values from cffi config flags cfg2 to cf1 Example:",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/cffi/recompiler.py",
+      "path": "backend/venv/Lib/site-packages/cffi/recompiler.py",
+      "lang": "py",
+      "summary": "import io, os, sys, sysconfig from . import ffiplatform, model from .error import VerificationError from .cffi_opcode import * VERSION_BASE = 0x2601 VERSION_EMBEDDED = 0x2701",
+      "imports": [
+        "tp *",
+        "*"
+      ],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/cffi/setuptools_ext.py",
+      "path": "backend/venv/Lib/site-packages/cffi/setuptools_ext.py",
+      "lang": "py",
+      "summary": "import os import sys import sysconfig try: basestring except NameError:",
+      "imports": [
+        "setup.py sdist"
+      ],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/cffi/vengine_cpy.py",
+      "path": "backend/venv/Lib/site-packages/cffi/vengine_cpy.py",
+      "lang": "py",
+      "summary": "# # DEPRECATED: implementation for ffi.verify() # import sys from . import model from .error import VerificationError",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/cffi/vengine_gen.py",
+      "path": "backend/venv/Lib/site-packages/cffi/vengine_gen.py",
+      "lang": "py",
+      "summary": "# # DEPRECATED: implementation for ffi.verify() # import sys, os import types from . import model",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/cffi/verifier.py",
+      "path": "backend/venv/Lib/site-packages/cffi/verifier.py",
+      "lang": "py",
+      "summary": "# # DEPRECATED: implementation for ffi.verify() # import sys, os, binascii, shutil, io from . import __version_verifier_modules__ from . import ffiplatform",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/cffi/_cffi_errors.h",
+      "path": "backend/venv/Lib/site-packages/cffi/_cffi_errors.h",
+      "lang": "h",
+      "summary": "#ifndef CFFI_MESSAGEBOX # ifdef _MSC_VER # define CFFI_MESSAGEBOX 1 # else # define CFFI_MESSAGEBOX 0 # endif",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/cffi/_cffi_include.h",
+      "path": "backend/venv/Lib/site-packages/cffi/_cffi_include.h",
+      "lang": "h",
+      "summary": "#define _CFFI_ /* We try to define Py_LIMITED_API before including Python.h. Mess: we can only define it if Py_DEBUG, Py_TRACE_REFS and Py_REF_DEBUG are not defined. This is a best-effort approximation: we can learn about Py_DEBUG from pyco",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/cffi/_embedding.h",
+      "path": "backend/venv/Lib/site-packages/cffi/_embedding.h",
+      "lang": "h",
+      "summary": "/***** Support code for embedding *****/ #ifdef __cplusplus extern \"C\" { #endif #if defined(_WIN32) # define CFFI_DLLEXPORT __declspec(dllexport)",
+      "imports": [
+        "libpythonX.Y.so"
+      ],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/cffi/_imp_emulation.py",
+      "path": "backend/venv/Lib/site-packages/cffi/_imp_emulation.py",
+      "lang": "py",
+      "summary": "try: # this works on Python < 3.12 from imp import * except ImportError: # this is a limited emulation for Python >= 3.12. # Note that this is used only for tests or for the old ffi.verify().",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/cffi/_shimmed_dist_utils.py",
+      "path": "backend/venv/Lib/site-packages/cffi/_shimmed_dist_utils.py",
+      "lang": "py",
+      "summary": "\"\"\" Temporary shim module to indirect the bits of distutils we need from setuptools/distutils while providing useful error messages beyond `No module named 'distutils' on Python >= 3.12, or when setuptools' vendored distutils is broken. Thi",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/cffi/__init__.py",
+      "path": "backend/venv/Lib/site-packages/cffi/__init__.py",
+      "lang": "py",
+      "summary": "__all__ = ['FFI', 'VerificationError', 'VerificationMissing', 'CDefError', 'FFIError'] from .api import FFI from .error import CDefError, FFIError, VerificationError, VerificationMissing from .error import PkgConfigError __version__ = \"2.0.",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/charset_normalizer/api.py",
+      "path": "backend/venv/Lib/site-packages/charset_normalizer/api.py",
+      "lang": "py",
+      "summary": "from __future__ import annotations import logging from os import PathLike from typing import BinaryIO from .cd import ( coherence_ratio,",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/charset_normalizer/cd.py",
+      "path": "backend/venv/Lib/site-packages/charset_normalizer/cd.py",
+      "lang": "py",
+      "summary": "from __future__ import annotations import importlib from codecs import IncrementalDecoder from collections import Counter from functools import lru_cache from typing import Counter as TypeCounter",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/charset_normalizer/constant.py",
+      "path": "backend/venv/Lib/site-packages/charset_normalizer/constant.py",
+      "lang": "py",
+      "summary": "from __future__ import annotations from codecs import BOM_UTF8, BOM_UTF16_BE, BOM_UTF16_LE, BOM_UTF32_BE, BOM_UTF32_LE from encodings.aliases import aliases from re import IGNORECASE from re import compile as re_compile # Contain for each e",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/charset_normalizer/legacy.py",
+      "path": "backend/venv/Lib/site-packages/charset_normalizer/legacy.py",
+      "lang": "py",
+      "summary": "from __future__ import annotations from typing import TYPE_CHECKING, Any from warnings import warn from .api import from_bytes from .constant import CHARDET_CORRESPONDENCE, TOO_SMALL_SEQUENCE if TYPE_CHECKING:",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/charset_normalizer/md.py",
+      "path": "backend/venv/Lib/site-packages/charset_normalizer/md.py",
+      "lang": "py",
+      "summary": "from __future__ import annotations import sys from functools import lru_cache from logging import getLogger if sys.version_info >= (3, 8): from typing import final",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/charset_normalizer/models.py",
+      "path": "backend/venv/Lib/site-packages/charset_normalizer/models.py",
+      "lang": "py",
+      "summary": "from __future__ import annotations from encodings.aliases import aliases from json import dumps from re import sub from typing import Any, Iterator, List, Tuple from .constant import RE_POSSIBLE_ENCODING_INDICATION, TOO_BIG_SEQUENCE",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/charset_normalizer/utils.py",
+      "path": "backend/venv/Lib/site-packages/charset_normalizer/utils.py",
+      "lang": "py",
+      "summary": "from __future__ import annotations import importlib import logging import unicodedata from bisect import bisect_right from codecs import IncrementalDecoder",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/charset_normalizer/version.py",
+      "path": "backend/venv/Lib/site-packages/charset_normalizer/version.py",
+      "lang": "py",
+      "summary": "\"\"\" Expose version \"\"\" from __future__ import annotations __version__ = \"3.4.7\" VERSION = __version__.split(\".\")",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/charset_normalizer/__init__.py",
+      "path": "backend/venv/Lib/site-packages/charset_normalizer/__init__.py",
+      "lang": "py",
+      "summary": "\"\"\" Charset-Normalizer ~~~~~~~~~~~~~~ The Real First Universal Charset Detector. A library that helps you read text from an unknown charset encoding. Motivated by chardet, This package is trying to resolve the issue by taking a new approach",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/charset_normalizer/__main__.py",
+      "path": "backend/venv/Lib/site-packages/charset_normalizer/__main__.py",
+      "lang": "py",
+      "summary": "from __future__ import annotations from .cli import cli_detect if __name__ == \"__main__\": cli_detect()",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/chromadb/app.py",
+      "path": "backend/venv/Lib/site-packages/chromadb/app.py",
+      "lang": "py",
+      "summary": "import chromadb import chromadb.config from chromadb.server.fastapi import FastAPI settings = chromadb.config.Settings() server = FastAPI(settings) app = server.app()",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/chromadb/base_types.py",
+      "path": "backend/venv/Lib/site-packages/chromadb/base_types.py",
+      "lang": "py",
+      "summary": "from typing import Dict, List, Mapping, Optional, Sequence, Union, Any from typing_extensions import Literal, Final from dataclasses import dataclass import numpy as np from numpy.typing import NDArray # Type tag constants",
+      "imports": [
+        "tokens"
+      ],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/chromadb/config.py",
+      "path": "backend/venv/Lib/site-packages/chromadb/config.py",
+      "lang": "py",
+      "summary": "import importlib import inspect import logging from abc import ABC from enum import Enum from graphlib import TopologicalSorter",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/chromadb/errors.py",
+      "path": "backend/venv/Lib/site-packages/chromadb/errors.py",
+      "lang": "py",
+      "summary": "from abc import abstractmethod from typing import Dict, Optional, Type from overrides import overrides, EnforceOverrides class ChromaError(Exception, EnforceOverrides): trace_id: Optional[str] = None def code(self) -> int:",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/chromadb/log_config.yml",
+      "path": "backend/venv/Lib/site-packages/chromadb/log_config.yml",
+      "lang": "yml",
+      "summary": "version: 1 disable_existing_loggers: False formatters: default: \"()\": uvicorn.logging.DefaultFormatter format: '%(levelprefix)s [%(asctime)s] %(message)s'",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/chromadb/serde.py",
+      "path": "backend/venv/Lib/site-packages/chromadb/serde.py",
+      "lang": "py",
+      "summary": "from abc import abstractmethod from typing import Any, Dict, Generic, Protocol, TypeVar from typing_extensions import Self import json T = TypeVar(\"T\", covariant=True) class JSONSerializable(Protocol[T]):",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/chromadb/types.py",
+      "path": "backend/venv/Lib/site-packages/chromadb/types.py",
+      "lang": "py",
+      "summary": "from abc import ABC, abstractmethod from dataclasses import dataclass from typing import Any, Optional, Union, Sequence, Dict, Mapping, Generic from typing_extensions import Self from overrides import override from typing_extensions import ",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/chromadb/__init__.py",
+      "path": "backend/venv/Lib/site-packages/chromadb/__init__.py",
+      "lang": "py",
+      "summary": "from typing import Dict, Optional, Union __version__ = \"1.5.9\" import logging from chromadb.api.client import Client as ClientCreator from chromadb.api.client import ( AdminClient as AdminClientCreator,",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/chromadb_rust_bindings/__init__.py",
+      "path": "backend/venv/Lib/site-packages/chromadb_rust_bindings/__init__.py",
+      "lang": "py",
+      "summary": "from .chromadb_rust_bindings import * __doc__ = chromadb_rust_bindings.__doc__ if hasattr(chromadb_rust_bindings, \"__all__\"): __all__ = chromadb_rust_bindings.__all__",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/click/core.py",
+      "path": "backend/venv/Lib/site-packages/click/core.py",
+      "lang": "py",
+      "summary": "from __future__ import annotations import collections.abc as cabc import enum import errno import inspect import os",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/click/decorators.py",
+      "path": "backend/venv/Lib/site-packages/click/decorators.py",
+      "lang": "py",
+      "summary": "from __future__ import annotations import inspect import typing as t from functools import update_wrapper from gettext import gettext as _ from .core import Argument",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/click/exceptions.py",
+      "path": "backend/venv/Lib/site-packages/click/exceptions.py",
+      "lang": "py",
+      "summary": "from __future__ import annotations import collections.abc as cabc import typing as t from gettext import gettext as _ from gettext import ngettext from ._compat import get_text_stderr",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/click/formatting.py",
+      "path": "backend/venv/Lib/site-packages/click/formatting.py",
+      "lang": "py",
+      "summary": "from __future__ import annotations import collections.abc as cabc from contextlib import contextmanager from gettext import gettext as _ from ._compat import term_len from .parser import _split_opt",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/click/globals.py",
+      "path": "backend/venv/Lib/site-packages/click/globals.py",
+      "lang": "py",
+      "summary": "from __future__ import annotations import typing as t from threading import local if t.TYPE_CHECKING: from .core import Context _local = local()",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/click/parser.py",
+      "path": "backend/venv/Lib/site-packages/click/parser.py",
+      "lang": "py",
+      "summary": "\"\"\" This module started out as largely a copy paste from the stdlib's optparse module with the features removed that we do not need from optparse because we implement them in Click on a higher level (for instance type handling, help formatt",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/click/shell_completion.py",
+      "path": "backend/venv/Lib/site-packages/click/shell_completion.py",
+      "lang": "py",
+      "summary": "from __future__ import annotations import collections.abc as cabc import os import re import typing as t from gettext import gettext as _",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/click/termui.py",
+      "path": "backend/venv/Lib/site-packages/click/termui.py",
+      "lang": "py",
+      "summary": "from __future__ import annotations import collections.abc as cabc import inspect import io import itertools import re",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/click/testing.py",
+      "path": "backend/venv/Lib/site-packages/click/testing.py",
+      "lang": "py",
+      "summary": "from __future__ import annotations import collections.abc as cabc import contextlib import io import os import pdb",
+      "imports": [
+        "sys"
+      ],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/click/types.py",
+      "path": "backend/venv/Lib/site-packages/click/types.py",
+      "lang": "py",
+      "summary": "from __future__ import annotations import abc import collections.abc as cabc import enum import os import stat",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/click/utils.py",
+      "path": "backend/venv/Lib/site-packages/click/utils.py",
+      "lang": "py",
+      "summary": "from __future__ import annotations import collections.abc as cabc import os import re import sys import typing as t",
+      "imports": [
+        "-m script"
+      ],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/click/_compat.py",
+      "path": "backend/venv/Lib/site-packages/click/_compat.py",
+      "lang": "py",
+      "summary": "from __future__ import annotations import codecs import collections.abc as cabc import io import os import re",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/click/_termui_impl.py",
+      "path": "backend/venv/Lib/site-packages/click/_termui_impl.py",
+      "lang": "py",
+      "summary": "\"\"\" This module contains implementations for the termui module. To keep the import time of Click down, some infrequently used functionality is placed in this module and only imported as needed. \"\"\" from __future__ import annotations",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/click/_textwrap.py",
+      "path": "backend/venv/Lib/site-packages/click/_textwrap.py",
+      "lang": "py",
+      "summary": "from __future__ import annotations import collections.abc as cabc import textwrap from contextlib import contextmanager from ._compat import _ansi_re from ._compat import term_len",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/click/_utils.py",
+      "path": "backend/venv/Lib/site-packages/click/_utils.py",
+      "lang": "py",
+      "summary": "from __future__ import annotations import enum import typing as t class Sentinel(enum.Enum): \"\"\"Enum used to define sentinel values. .. seealso::",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/click/_winconsole.py",
+      "path": "backend/venv/Lib/site-packages/click/_winconsole.py",
+      "lang": "py",
+      "summary": "# This module is based on the excellent work by Adam Bartoš who # provided a lot of what went into the implementation here in # the discussion to issue1602 in the Python bug tracker. # # There are some general differences in regards to how ",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/click/__init__.py",
+      "path": "backend/venv/Lib/site-packages/click/__init__.py",
+      "lang": "py",
+      "summary": "\"\"\" Click is a simple Python module inspired by the stdlib optparse to make writing command line scripts fun. Unlike other modules, it's based around a simple API that does not come with too much magic and is composable. \"\"\"",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/colorama/ansi.py",
+      "path": "backend/venv/Lib/site-packages/colorama/ansi.py",
+      "lang": "py",
+      "summary": "# Copyright Jonathan Hartley 2013. BSD 3-Clause license, see LICENSE file. ''' This module generates ANSI character codes to printing colors to terminals. See: http://en.wikipedia.org/wiki/ANSI_escape_code ''' CSI = '\\033['",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/colorama/ansitowin32.py",
+      "path": "backend/venv/Lib/site-packages/colorama/ansitowin32.py",
+      "lang": "py",
+      "summary": "# Copyright Jonathan Hartley 2013. BSD 3-Clause license, see LICENSE file. import re import sys import os from .ansi import AnsiFore, AnsiBack, AnsiStyle, Style, BEL from .winterm import enable_vt_processing, WinTerm, WinColor, WinStyle",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/colorama/initialise.py",
+      "path": "backend/venv/Lib/site-packages/colorama/initialise.py",
+      "lang": "py",
+      "summary": "# Copyright Jonathan Hartley 2013. BSD 3-Clause license, see LICENSE file. import atexit import contextlib import sys from .ansitowin32 import AnsiToWin32 def _wipe_internal_state_for_tests():",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/colorama/win32.py",
+      "path": "backend/venv/Lib/site-packages/colorama/win32.py",
+      "lang": "py",
+      "summary": "# Copyright Jonathan Hartley 2013. BSD 3-Clause license, see LICENSE file. # from winbase.h STDOUT = -11 STDERR = -12 ENABLE_VIRTUAL_TERMINAL_PROCESSING = 0x0004 try:",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/colorama/winterm.py",
+      "path": "backend/venv/Lib/site-packages/colorama/winterm.py",
+      "lang": "py",
+      "summary": "# Copyright Jonathan Hartley 2013. BSD 3-Clause license, see LICENSE file. try: from msvcrt import get_osfhandle except ImportError: def get_osfhandle(_): raise OSError(\"This isn't windows!\")",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/colorama/__init__.py",
+      "path": "backend/venv/Lib/site-packages/colorama/__init__.py",
+      "lang": "py",
+      "summary": "# Copyright Jonathan Hartley 2013. BSD 3-Clause license, see LICENSE file. from .initialise import init, deinit, reinit, colorama_text, just_fix_windows_console from .ansi import Fore, Back, Style, Cursor from .ansitowin32 import AnsiToWin3",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/cryptography/exceptions.py",
+      "path": "backend/venv/Lib/site-packages/cryptography/exceptions.py",
+      "lang": "py",
+      "summary": "# This file is dual licensed under the terms of the Apache License, Version # 2.0, and the BSD License. See the LICENSE file in the root of this repository # for complete details. from __future__ import annotations import typing from crypto",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/cryptography/fernet.py",
+      "path": "backend/venv/Lib/site-packages/cryptography/fernet.py",
+      "lang": "py",
+      "summary": "# This file is dual licensed under the terms of the Apache License, Version # 2.0, and the BSD License. See the LICENSE file in the root of this repository # for complete details. from __future__ import annotations import base64 import bina",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/cryptography/utils.py",
+      "path": "backend/venv/Lib/site-packages/cryptography/utils.py",
+      "lang": "py",
+      "summary": "# This file is dual licensed under the terms of the Apache License, Version # 2.0, and the BSD License. See the LICENSE file in the root of this repository # for complete details. from __future__ import annotations import enum import sys",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/cryptography/__about__.py",
+      "path": "backend/venv/Lib/site-packages/cryptography/__about__.py",
+      "lang": "py",
+      "summary": "# This file is dual licensed under the terms of the Apache License, Version # 2.0, and the BSD License. See the LICENSE file in the root of this repository # for complete details. from __future__ import annotations __all__ = [ \"__author__\",",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/cryptography/__init__.py",
+      "path": "backend/venv/Lib/site-packages/cryptography/__init__.py",
+      "lang": "py",
+      "summary": "# This file is dual licensed under the terms of the Apache License, Version # 2.0, and the BSD License. See the LICENSE file in the root of this repository # for complete details. from __future__ import annotations from cryptography.__about",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/dateutil/easter.py",
+      "path": "backend/venv/Lib/site-packages/dateutil/easter.py",
+      "lang": "py",
+      "summary": "# -*- coding: utf-8 -*- \"\"\" This module offers a generic Easter computing method for any given year, using Western, Orthodox or Julian algorithms. \"\"\" import datetime",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/dateutil/relativedelta.py",
+      "path": "backend/venv/Lib/site-packages/dateutil/relativedelta.py",
+      "lang": "py",
+      "summary": "# -*- coding: utf-8 -*- import datetime import calendar import operator from math import copysign from six import integer_types",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/dateutil/rrule.py",
+      "path": "backend/venv/Lib/site-packages/dateutil/rrule.py",
+      "lang": "py",
+      "summary": "# -*- coding: utf-8 -*- \"\"\" The rrule module offers a small, complete, and very fast, implementation of the recurrence rules documented in the `iCalendar RFC <https://tools.ietf.org/html/rfc5545>`_, including support for caching of results.",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/dateutil/tzwin.py",
+      "path": "backend/venv/Lib/site-packages/dateutil/tzwin.py",
+      "lang": "py",
+      "summary": "# tzwin has moved to dateutil.tz.win from .tz.win import *",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/dateutil/utils.py",
+      "path": "backend/venv/Lib/site-packages/dateutil/utils.py",
+      "lang": "py",
+      "summary": "# -*- coding: utf-8 -*- \"\"\" This module offers general convenience and utility functions for dealing with datetimes. .. versionadded:: 2.7.0 \"\"\"",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/dateutil/_common.py",
+      "path": "backend/venv/Lib/site-packages/dateutil/_common.py",
+      "lang": "py",
+      "summary": "\"\"\" Common code used in multiple modules. \"\"\" class weekday(object): __slots__ = [\"weekday\", \"n\"] def __init__(self, weekday, n=None):",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/dateutil/_version.py",
+      "path": "backend/venv/Lib/site-packages/dateutil/_version.py",
+      "lang": "py",
+      "summary": "# file generated by setuptools_scm # don't change, don't track in version control __version__ = version = '2.9.0.post0' __version_tuple__ = version_tuple = (2, 9, 0)",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/dateutil/__init__.py",
+      "path": "backend/venv/Lib/site-packages/dateutil/__init__.py",
+      "lang": "py",
+      "summary": "# -*- coding: utf-8 -*- import sys try: from ._version import version as __version__ except ImportError: __version__ = 'unknown'",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/distro/distro.py",
+      "path": "backend/venv/Lib/site-packages/distro/distro.py",
+      "lang": "py",
+      "summary": "#!/usr/bin/env python # Copyright 2015-2021 Nir Cohen # # Licensed under the Apache License, Version 2.0 (the \"License\"); # you may not use this file except in compliance with the License. # You may obtain a copy of the License at",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/distro/__init__.py",
+      "path": "backend/venv/Lib/site-packages/distro/__init__.py",
+      "lang": "py",
+      "summary": "from .distro import ( NORMALIZED_DISTRO_ID, NORMALIZED_LSB_ID, NORMALIZED_OS_ID, LinuxDistribution, __version__,",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/distro/__main__.py",
+      "path": "backend/venv/Lib/site-packages/distro/__main__.py",
+      "lang": "py",
+      "summary": "from .distro import main if __name__ == \"__main__\": main()",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/docx/api.py",
+      "path": "backend/venv/Lib/site-packages/docx/api.py",
+      "lang": "py",
+      "summary": "\"\"\"Directly exposed API functions and classes, :func:`Document` for now. Provides a syntactically more convenient API for interacting with the OpcPackage graph. \"\"\" from __future__ import annotations import os from typing import IO, TYPE_CH",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/docx/blkcntnr.py",
+      "path": "backend/venv/Lib/site-packages/docx/blkcntnr.py",
+      "lang": "py",
+      "summary": "# pyright: reportImportCycles=false \"\"\"Block item container, used by body, cell, header, etc. Block level items are things like paragraph and table, although there are a few other specialized ones like structured document tags. \"\"\" from __f",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/docx/comments.py",
+      "path": "backend/venv/Lib/site-packages/docx/comments.py",
+      "lang": "py",
+      "summary": "\"\"\"Collection providing access to comments added to this document.\"\"\" from __future__ import annotations import datetime as dt from typing import TYPE_CHECKING, Iterator from docx.blkcntnr import BlockItemContainer if TYPE_CHECKING:",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/docx/document.py",
+      "path": "backend/venv/Lib/site-packages/docx/document.py",
+      "lang": "py",
+      "summary": "# pyright: reportImportCycles=false # pyright: reportPrivateUsage=false \"\"\"|Document| and closely related objects.\"\"\" from __future__ import annotations from typing import IO, TYPE_CHECKING, Iterator, List, Sequence from docx.blkcntnr impor",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/docx/exceptions.py",
+      "path": "backend/venv/Lib/site-packages/docx/exceptions.py",
+      "lang": "py",
+      "summary": "\"\"\"Exceptions used with python-docx. The base exception class is PythonDocxError. \"\"\" class PythonDocxError(Exception): \"\"\"Generic error class.\"\"\" class InvalidSpanError(PythonDocxError):",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/docx/package.py",
+      "path": "backend/venv/Lib/site-packages/docx/package.py",
+      "lang": "py",
+      "summary": "\"\"\"WordprocessingML Package class and related objects.\"\"\" from __future__ import annotations from typing import IO, cast from docx.image.image import Image from docx.opc.constants import RELATIONSHIP_TYPE as RT from docx.opc.package import ",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/docx/section.py",
+      "path": "backend/venv/Lib/site-packages/docx/section.py",
+      "lang": "py",
+      "summary": "\"\"\"The |Section| object and related proxy classes.\"\"\" from __future__ import annotations from typing import TYPE_CHECKING, Iterator, List, Sequence, overload from docx.blkcntnr import BlockItemContainer from docx.enum.section import WD_HEAD",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/docx/settings.py",
+      "path": "backend/venv/Lib/site-packages/docx/settings.py",
+      "lang": "py",
+      "summary": "\"\"\"Settings object, providing access to document-level settings.\"\"\" from __future__ import annotations from typing import TYPE_CHECKING, cast from docx.shared import ElementProxy if TYPE_CHECKING: import docx.types as t",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/docx/shape.py",
+      "path": "backend/venv/Lib/site-packages/docx/shape.py",
+      "lang": "py",
+      "summary": "\"\"\"Objects related to shapes. A shape is a visual object that appears on the drawing layer of a document. \"\"\" from __future__ import annotations from typing import TYPE_CHECKING from docx.enum.shape import WD_INLINE_SHAPE",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/docx/shared.py",
+      "path": "backend/venv/Lib/site-packages/docx/shared.py",
+      "lang": "py",
+      "summary": "\"\"\"Objects shared by docx modules.\"\"\" from __future__ import annotations import functools from typing import ( TYPE_CHECKING, Any,",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/docx/table.py",
+      "path": "backend/venv/Lib/site-packages/docx/table.py",
+      "lang": "py",
+      "summary": "\"\"\"The |Table| object and related proxy classes.\"\"\" from __future__ import annotations from typing import TYPE_CHECKING, Iterator, cast, overload from typing_extensions import TypeAlias from docx.blkcntnr import BlockItemContainer from docx",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/docx/types.py",
+      "path": "backend/venv/Lib/site-packages/docx/types.py",
+      "lang": "py",
+      "summary": "\"\"\"Abstract types used by `python-docx`.\"\"\" from __future__ import annotations from typing import TYPE_CHECKING from typing_extensions import Protocol if TYPE_CHECKING: from docx.opc.part import XmlPart",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/docx/__init__.py",
+      "path": "backend/venv/Lib/site-packages/docx/__init__.py",
+      "lang": "py",
+      "summary": "\"\"\"Initialize `docx` package. Export the `Document` constructor function and establish the mapping of part-type to the part-classe that implements that type. \"\"\" from __future__ import annotations from typing import TYPE_CHECKING, Type",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/dotenv/cli.py",
+      "path": "backend/venv/Lib/site-packages/dotenv/cli.py",
+      "lang": "py",
+      "summary": "import json import os import shlex import sys from contextlib import contextmanager from typing import IO, Any, Dict, Iterator, List, Optional",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/dotenv/ipython.py",
+      "path": "backend/venv/Lib/site-packages/dotenv/ipython.py",
+      "lang": "py",
+      "summary": "from IPython.core.magic import Magics, line_magic, magics_class # type: ignore from IPython.core.magic_arguments import ( argument, magic_arguments, parse_argstring, ) # type: ignore",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/dotenv/main.py",
+      "path": "backend/venv/Lib/site-packages/dotenv/main.py",
+      "lang": "py",
+      "summary": "import io import logging import os import pathlib import stat import sys",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/dotenv/parser.py",
+      "path": "backend/venv/Lib/site-packages/dotenv/parser.py",
+      "lang": "py",
+      "summary": "import codecs import re from typing import ( IO, Iterator, Match,",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/dotenv/variables.py",
+      "path": "backend/venv/Lib/site-packages/dotenv/variables.py",
+      "lang": "py",
+      "summary": "import re from abc import ABCMeta, abstractmethod from typing import Iterator, Mapping, Optional, Pattern _posix_variable: Pattern[str] = re.compile( r\"\"\" \\$\\{",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/dotenv/version.py",
+      "path": "backend/venv/Lib/site-packages/dotenv/version.py",
+      "lang": "py",
+      "summary": "__version__ = \"1.2.2\"",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/dotenv/__init__.py",
+      "path": "backend/venv/Lib/site-packages/dotenv/__init__.py",
+      "lang": "py",
+      "summary": "from typing import Any, Optional from .main import dotenv_values, find_dotenv, get_key, load_dotenv, set_key, unset_key def load_ipython_extension(ipython: Any) -> None: from .ipython import load_ipython_extension load_ipython_extension(ipy",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/dotenv/__main__.py",
+      "path": "backend/venv/Lib/site-packages/dotenv/__main__.py",
+      "lang": "py",
+      "summary": "\"\"\"Entry point for cli, enables execution with `python -m dotenv`\"\"\" from .cli import cli if __name__ == \"__main__\": cli()",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/durationpy/duration.py",
+      "path": "backend/venv/Lib/site-packages/durationpy/duration.py",
+      "lang": "py",
+      "summary": "# -*- coding: UTF-8 -*- import re import datetime _nanosecond_size = 1 _microsecond_size = 1000 * _nanosecond_size _millisecond_size = 1000 * _microsecond_size",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/durationpy/__init__.py",
+      "path": "backend/venv/Lib/site-packages/durationpy/__init__.py",
+      "lang": "py",
+      "summary": "# -*- coding: UTF-8 -*- from .duration import to_str, from_str, DurationError",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/fastapi/applications.py",
+      "path": "backend/venv/Lib/site-packages/fastapi/applications.py",
+      "lang": "py",
+      "summary": "import os from collections.abc import Awaitable, Callable, Coroutine, Sequence from enum import Enum from typing import Annotated, Any, Literal, TypeVar from annotated_doc import Doc from fastapi import routing",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/fastapi/background.py",
+      "path": "backend/venv/Lib/site-packages/fastapi/background.py",
+      "lang": "py",
+      "summary": "from collections.abc import Callable from typing import Annotated, Any from annotated_doc import Doc from starlette.background import BackgroundTasks as StarletteBackgroundTasks from typing_extensions import ParamSpec P = ParamSpec(\"P\")",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/fastapi/cli.py",
+      "path": "backend/venv/Lib/site-packages/fastapi/cli.py",
+      "lang": "py",
+      "summary": "try: from fastapi_cli.cli import main as cli_main except ImportError: # pragma: no cover cli_main = None # type: ignore def main() -> None: if not cli_main: # type: ignore[truthy-function]",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/fastapi/concurrency.py",
+      "path": "backend/venv/Lib/site-packages/fastapi/concurrency.py",
+      "lang": "py",
+      "summary": "from collections.abc import AsyncGenerator from contextlib import AbstractContextManager from contextlib import asynccontextmanager as asynccontextmanager from typing import TypeVar import anyio.to_thread from anyio import CapacityLimiter",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/fastapi/datastructures.py",
+      "path": "backend/venv/Lib/site-packages/fastapi/datastructures.py",
+      "lang": "py",
+      "summary": "from collections.abc import Callable, Mapping from typing import ( Annotated, Any, BinaryIO, TypeVar,",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/fastapi/encoders.py",
+      "path": "backend/venv/Lib/site-packages/fastapi/encoders.py",
+      "lang": "py",
+      "summary": "import dataclasses import datetime from collections import defaultdict, deque from collections.abc import Callable from decimal import Decimal from enum import Enum",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/fastapi/exceptions.py",
+      "path": "backend/venv/Lib/site-packages/fastapi/exceptions.py",
+      "lang": "py",
+      "summary": "from collections.abc import Mapping, Sequence from typing import Annotated, Any, TypedDict from annotated_doc import Doc from pydantic import BaseModel, create_model from starlette.exceptions import HTTPException as StarletteHTTPException f",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/fastapi/exception_handlers.py",
+      "path": "backend/venv/Lib/site-packages/fastapi/exception_handlers.py",
+      "lang": "py",
+      "summary": "from fastapi.encoders import jsonable_encoder from fastapi.exceptions import RequestValidationError, WebSocketRequestValidationError from fastapi.utils import is_body_allowed_for_status_code from fastapi.websockets import WebSocket from sta",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/fastapi/logger.py",
+      "path": "backend/venv/Lib/site-packages/fastapi/logger.py",
+      "lang": "py",
+      "summary": "import logging logger = logging.getLogger(\"fastapi\")",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/fastapi/params.py",
+      "path": "backend/venv/Lib/site-packages/fastapi/params.py",
+      "lang": "py",
+      "summary": "import warnings from collections.abc import Callable, Sequence from dataclasses import dataclass from enum import Enum from typing import Annotated, Any, Literal from fastapi.exceptions import FastAPIDeprecationWarning",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/fastapi/param_functions.py",
+      "path": "backend/venv/Lib/site-packages/fastapi/param_functions.py",
+      "lang": "py",
+      "summary": "from collections.abc import Callable, Sequence from typing import Annotated, Any, Literal from annotated_doc import Doc from fastapi import params from fastapi._compat import Undefined from fastapi.datastructures import _Unset",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/fastapi/requests.py",
+      "path": "backend/venv/Lib/site-packages/fastapi/requests.py",
+      "lang": "py",
+      "summary": "from starlette.requests import HTTPConnection as HTTPConnection # noqa: F401 from starlette.requests import Request as Request # noqa: F401",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/fastapi/responses.py",
+      "path": "backend/venv/Lib/site-packages/fastapi/responses.py",
+      "lang": "py",
+      "summary": "import importlib from typing import Any, Protocol, cast from fastapi.exceptions import FastAPIDeprecationWarning from fastapi.sse import EventSourceResponse as EventSourceResponse # noqa from starlette.responses import FileResponse as FileR",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/fastapi/routing.py",
+      "path": "backend/venv/Lib/site-packages/fastapi/routing.py",
+      "lang": "py",
+      "summary": "import contextlib import copy import email.message import errno import functools import inspect",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/fastapi/sse.py",
+      "path": "backend/venv/Lib/site-packages/fastapi/sse.py",
+      "lang": "py",
+      "summary": "from typing import Annotated, Any from annotated_doc import Doc from pydantic import AfterValidator, BaseModel, Field, model_validator from starlette.responses import StreamingResponse # Canonical SSE event schema matching the OpenAPI 3.2 s",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/fastapi/staticfiles.py",
+      "path": "backend/venv/Lib/site-packages/fastapi/staticfiles.py",
+      "lang": "py",
+      "summary": "from starlette.staticfiles import StaticFiles as StaticFiles # noqa",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/fastapi/templating.py",
+      "path": "backend/venv/Lib/site-packages/fastapi/templating.py",
+      "lang": "py",
+      "summary": "from starlette.templating import Jinja2Templates as Jinja2Templates # noqa",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/fastapi/testclient.py",
+      "path": "backend/venv/Lib/site-packages/fastapi/testclient.py",
+      "lang": "py",
+      "summary": "from starlette.testclient import TestClient as TestClient # noqa",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/fastapi/types.py",
+      "path": "backend/venv/Lib/site-packages/fastapi/types.py",
+      "lang": "py",
+      "summary": "import types from collections.abc import Callable from enum import Enum from typing import Any, TypeVar, Union from pydantic import BaseModel from pydantic.main import IncEx as IncEx",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/fastapi/utils.py",
+      "path": "backend/venv/Lib/site-packages/fastapi/utils.py",
+      "lang": "py",
+      "summary": "import re import warnings from typing import ( TYPE_CHECKING, Any, Literal,",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/fastapi/websockets.py",
+      "path": "backend/venv/Lib/site-packages/fastapi/websockets.py",
+      "lang": "py",
+      "summary": "from starlette.websockets import WebSocket as WebSocket # noqa from starlette.websockets import WebSocketDisconnect as WebSocketDisconnect # noqa from starlette.websockets import WebSocketState as WebSocketState # noqa",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/fastapi/__init__.py",
+      "path": "backend/venv/Lib/site-packages/fastapi/__init__.py",
+      "lang": "py",
+      "summary": "\"\"\"FastAPI framework, high performance, easy to learn, fast to code, ready for production\"\"\" __version__ = \"0.138.1\" from starlette import status as status from .applications import FastAPI as FastAPI from .background import BackgroundTasks",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/fastapi/__main__.py",
+      "path": "backend/venv/Lib/site-packages/fastapi/__main__.py",
+      "lang": "py",
+      "summary": "from fastapi.cli import main main()",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/filelock/asyncio.py",
+      "path": "backend/venv/Lib/site-packages/filelock/asyncio.py",
+      "lang": "py",
+      "summary": "\"\"\"An asyncio-based implementation of the file lock.\"\"\" from __future__ import annotations import asyncio import contextlib import logging import os",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/filelock/version.py",
+      "path": "backend/venv/Lib/site-packages/filelock/version.py",
+      "lang": "py",
+      "summary": "# file generated by vcs-versioning # don't change, don't track in version control from __future__ import annotations __all__ = [ \"__version__\", \"__version_tuple__\",",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/filelock/_api.py",
+      "path": "backend/venv/Lib/site-packages/filelock/_api.py",
+      "lang": "py",
+      "summary": "from __future__ import annotations import contextlib import inspect import logging import os import sys",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/filelock/_async_read_write.py",
+      "path": "backend/venv/Lib/site-packages/filelock/_async_read_write.py",
+      "lang": "py",
+      "summary": "\"\"\"Async wrapper around :class:`ReadWriteLock` for use with ``asyncio``.\"\"\" from __future__ import annotations import asyncio import functools from concurrent.futures import ThreadPoolExecutor from contextlib import asynccontextmanager",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/filelock/_error.py",
+      "path": "backend/venv/Lib/site-packages/filelock/_error.py",
+      "lang": "py",
+      "summary": "from __future__ import annotations class Timeout(TimeoutError): # noqa: N818 \"\"\"Raised when the lock could not be acquired in *timeout* seconds.\"\"\" def __init__(self, lock_file: str) -> None: super().__init__() self._lock_file = lock_file",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/filelock/_read_write.py",
+      "path": "backend/venv/Lib/site-packages/filelock/_read_write.py",
+      "lang": "py",
+      "summary": "from __future__ import annotations import atexit import logging import os import pathlib import sqlite3",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/filelock/_soft.py",
+      "path": "backend/venv/Lib/site-packages/filelock/_soft.py",
+      "lang": "py",
+      "summary": "from __future__ import annotations import os import socket import sys import time from contextlib import suppress",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/filelock/_unix.py",
+      "path": "backend/venv/Lib/site-packages/filelock/_unix.py",
+      "lang": "py",
+      "summary": "from __future__ import annotations import os import sys import warnings from contextlib import suppress from errno import EAGAIN, ENOSYS, EWOULDBLOCK",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/filelock/_util.py",
+      "path": "backend/venv/Lib/site-packages/filelock/_util.py",
+      "lang": "py",
+      "summary": "from __future__ import annotations import os import stat import sys from errno import EACCES, EISDIR from pathlib import Path",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/filelock/_windows.py",
+      "path": "backend/venv/Lib/site-packages/filelock/_windows.py",
+      "lang": "py",
+      "summary": "from __future__ import annotations import os import sys from contextlib import suppress from errno import EACCES from pathlib import Path",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/filelock/__init__.py",
+      "path": "backend/venv/Lib/site-packages/filelock/__init__.py",
+      "lang": "py",
+      "summary": "\"\"\" A platform independent file lock that supports the with-statement. .. autodata:: filelock.__version__ :no-value: \"\"\" from __future__ import annotations",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/filetype/filetype.py",
+      "path": "backend/venv/Lib/site-packages/filetype/filetype.py",
+      "lang": "py",
+      "summary": "# -*- coding: utf-8 -*- from __future__ import absolute_import from .match import match from .types import TYPES, Type # Expose supported matchers types types = TYPES",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/filetype/helpers.py",
+      "path": "backend/venv/Lib/site-packages/filetype/helpers.py",
+      "lang": "py",
+      "summary": "# -*- coding: utf-8 -*- from __future__ import absolute_import from .types import TYPES from .match import ( image_match, font_match, document_match, video_match, audio_match, archive_match",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/filetype/match.py",
+      "path": "backend/venv/Lib/site-packages/filetype/match.py",
+      "lang": "py",
+      "summary": "# -*- coding: utf-8 -*- from __future__ import absolute_import from .types import ARCHIVE as archive_matchers from .types import AUDIO as audio_matchers from .types import APPLICATION as application_matchers from .types import DOCUMENT as d",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/filetype/utils.py",
+      "path": "backend/venv/Lib/site-packages/filetype/utils.py",
+      "lang": "py",
+      "summary": "# -*- coding: utf-8 -*- # Python 2.7 workaround try: import pathlib except ImportError: pass",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/filetype/__init__.py",
+      "path": "backend/venv/Lib/site-packages/filetype/__init__.py",
+      "lang": "py",
+      "summary": "# -*- coding: utf-8 -*- from __future__ import absolute_import from .filetype import * # noqa from .helpers import * # noqa from .match import * # noqa # Current package semver version",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/filetype/__main__.py",
+      "path": "backend/venv/Lib/site-packages/filetype/__main__.py",
+      "lang": "py",
+      "summary": "import sys import filetype def guess(path): kind = filetype.guess(path) if kind is None: print('{}: File type determination failure.'.format(path))",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/flatbuffers/builder.py",
+      "path": "backend/venv/Lib/site-packages/flatbuffers/builder.py",
+      "lang": "py",
+      "summary": "# Copyright 2014 Google Inc. All rights reserved. # # Licensed under the Apache License, Version 2.0 (the \"License\"); # you may not use this file except in compliance with the License. # You may obtain a copy of the License at #",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/flatbuffers/compat.py",
+      "path": "backend/venv/Lib/site-packages/flatbuffers/compat.py",
+      "lang": "py",
+      "summary": "# Copyright 2016 Google Inc. All rights reserved. # # Licensed under the Apache License, Version 2.0 (the \"License\"); # you may not use this file except in compliance with the License. # You may obtain a copy of the License at #",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/flatbuffers/encode.py",
+      "path": "backend/venv/Lib/site-packages/flatbuffers/encode.py",
+      "lang": "py",
+      "summary": "# Copyright 2014 Google Inc. All rights reserved. # # Licensed under the Apache License, Version 2.0 (the \"License\"); # you may not use this file except in compliance with the License. # You may obtain a copy of the License at #",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/flatbuffers/flexbuffers.py",
+      "path": "backend/venv/Lib/site-packages/flatbuffers/flexbuffers.py",
+      "lang": "py",
+      "summary": "# Lint as: python3 # Copyright 2020 Google Inc. All rights reserved. # # Licensed under the Apache License, Version 2.0 (the \"License\"); # you may not use this file except in compliance with the License. # You may obtain a copy of the Licen",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/flatbuffers/number_types.py",
+      "path": "backend/venv/Lib/site-packages/flatbuffers/number_types.py",
+      "lang": "py",
+      "summary": "# Copyright 2014 Google Inc. All rights reserved. # # Licensed under the Apache License, Version 2.0 (the \"License\"); # you may not use this file except in compliance with the License. # You may obtain a copy of the License at #",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/flatbuffers/packer.py",
+      "path": "backend/venv/Lib/site-packages/flatbuffers/packer.py",
+      "lang": "py",
+      "summary": "# Copyright 2016 Google Inc. All rights reserved. # # Licensed under the Apache License, Version 2.0 (the \"License\"); # you may not use this file except in compliance with the License. # You may obtain a copy of the License at #",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/flatbuffers/table.py",
+      "path": "backend/venv/Lib/site-packages/flatbuffers/table.py",
+      "lang": "py",
+      "summary": "# Copyright 2014 Google Inc. All rights reserved. # # Licensed under the Apache License, Version 2.0 (the \"License\"); # you may not use this file except in compliance with the License. # You may obtain a copy of the License at #",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/flatbuffers/util.py",
+      "path": "backend/venv/Lib/site-packages/flatbuffers/util.py",
+      "lang": "py",
+      "summary": "# Copyright 2017 Google Inc. All rights reserved. # # Licensed under the Apache License, Version 2.0 (the \"License\"); # you may not use this file except in compliance with the License. # You may obtain a copy of the License at #",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/flatbuffers/_version.py",
+      "path": "backend/venv/Lib/site-packages/flatbuffers/_version.py",
+      "lang": "py",
+      "summary": "# Copyright 2019 Google Inc. All rights reserved. # # Licensed under the Apache License, Version 2.0 (the \"License\"); # you may not use this file except in compliance with the License. # You may obtain a copy of the License at #",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/flatbuffers/__init__.py",
+      "path": "backend/venv/Lib/site-packages/flatbuffers/__init__.py",
+      "lang": "py",
+      "summary": "# Copyright 2014 Google Inc. All rights reserved. # # Licensed under the Apache License, Version 2.0 (the \"License\"); # you may not use this file except in compliance with the License. # You may obtain a copy of the License at #",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/frozenlist/__init__.py",
+      "path": "backend/venv/Lib/site-packages/frozenlist/__init__.py",
+      "lang": "py",
+      "summary": "import os import types from collections.abc import MutableSequence from functools import total_ordering __version__ = \"1.8.0\" __all__ = (\"FrozenList\", \"PyFrozenList\") # type: Tuple[str, ...]",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/fsspec/archive.py",
+      "path": "backend/venv/Lib/site-packages/fsspec/archive.py",
+      "lang": "py",
+      "summary": "import operator from fsspec import AbstractFileSystem from fsspec.utils import tokenize class AbstractArchiveFileSystem(AbstractFileSystem): \"\"\" A generic superclass for implementing Archive-based filesystems.",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/fsspec/asyn.py",
+      "path": "backend/venv/Lib/site-packages/fsspec/asyn.py",
+      "lang": "py",
+      "summary": "import asyncio import asyncio.events import functools import inspect import io import numbers",
+      "imports": [],
+      "exports": []
+    },
+    {
+      "id": "backend/venv/Lib/site-packages/fsspec/caching.py",
+      "path": "backend/venv/Lib/site-packages/fsspec/caching.py",
+      "lang": "py",
+      "summary": "from __future__ import annotations import collections import functools import logging import math import os",
+      "imports": [],
+      "exports": []
+    }
+  ],
+  "edges": [
+    {
+      "from": "frontend/src/components/chat/ChatContainer.tsx",
+      "to": "frontend/src/components/chat/ChatInput.tsx",
+      "type": "imports"
+    },
+    {
+      "from": "frontend/src/components/chat/ChatContainer.tsx",
+      "to": "frontend/src/components/chat/MessageBubble.tsx",
+      "type": "imports"
+    },
+    {
+      "from": "frontend/src/components/chat/CitationModal.tsx",
+      "to": "frontend/src/components/chat/MessageBubble.tsx",
+      "type": "imports"
+    },
+    {
+      "from": "frontend/src/components/chat/MessageBubble.tsx",
+      "to": "frontend/src/components/chat/CitationModal.tsx",
+      "type": "imports"
+    }
+  ]
+}
