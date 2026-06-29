@@ -50,9 +50,9 @@ export default function ChatContainer({ sessionId }: ChatContainerProps) {
   const handleSend = useCallback(
     async (message: string) => {
       const userMsg: Message = {
+        id: Date.now().toString(),
         role: "user",
         content: message,
-        id: String(Date.now()),
       };
       setMessages((prev) => [...prev, userMsg]);
       setIsLoading(true);
@@ -60,29 +60,27 @@ export default function ChatContainer({ sessionId }: ChatContainerProps) {
       try {
         const data = await queryRAG(message, sessionId);
         const assistantMsg: Message = {
+          id: (Date.now() + 1).toString(),
           role: "assistant",
           content:
             data.answer ||
-            "I received your message but couldn't generate a response.",
+            "I received your message but could not generate a response.",
           sources: data.sources || [],
           confidenceScore: data.confidence_score || 0,
           responseTimeMs: data.response_time_ms || 0,
           mode: data.mode || "general",
-          id: String(Date.now() + 1),
         };
         setMessages((prev) => [...prev, assistantMsg]);
       } catch {
         const errorMsg: Message = {
+          id: (Date.now() + 1).toString(),
           role: "assistant",
           content:
-            "⚠️ Cannot connect to the backend server. Please check if the API is running at: " +
-            (process.env.NEXT_PUBLIC_API_URL ||
-              "https://rag-38rs.onrender.com/api/v1"),
+            "⚠️ Cannot connect to backend. Please check your API connection.",
           sources: [],
           confidenceScore: 0,
           responseTimeMs: 0,
           mode: "error",
-          id: String(Date.now() + 1),
         };
         setMessages((prev) => [...prev, errorMsg]);
       } finally {

@@ -1,5 +1,6 @@
 const BASE =
-  process.env.NEXT_PUBLIC_API_URL || "https://rag-38rs.onrender.com/api/v1";
+  process.env.NEXT_PUBLIC_API_URL ||
+  "https://rag-38rs.onrender.com/api/v1";
 
 export async function queryRAG(query: string, sessionId: string) {
   const res = await fetch(`${BASE}/chat/query`, {
@@ -35,7 +36,9 @@ export async function getDocuments() {
 }
 
 export async function deleteDocument(id: string) {
-  const res = await fetch(`${BASE}/documents/${id}`, { method: "DELETE" });
+  const res = await fetch(`${BASE}/documents/${id}`, {
+    method: "DELETE",
+  });
   if (!res.ok) throw new Error("Delete failed");
   return res.json();
 }

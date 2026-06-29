@@ -29,11 +29,7 @@ app = FastAPI(title="Enterprise RAG AI Assistant", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "https://rag-three-pi.vercel.app",
-        "http://localhost:3000",
-        "*",
-    ],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
