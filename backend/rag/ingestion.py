@@ -2,20 +2,18 @@ import os
 import uuid
 from pathlib import Path
 
+from langchain_community.vectorstores import Chroma
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import Docx2txtLoader, PyPDFLoader, TextLoader
-from langchain_community.vectorstores import Chroma
-from langchain_community.embeddings import HuggingFaceEmbeddings
 
 from config import settings
 from database import get_db_connection
+from rag.embeddings import get_embeddings
 
 
 class DocumentIngestionEngine:
     def __init__(self) -> None:
-        self.embeddings = HuggingFaceEmbeddings(
-            model_name=settings.EMBEDDING_MODEL
-        )
+        self.embeddings = get_embeddings()
         os.makedirs(settings.CHROMA_PERSIST_DIR, exist_ok=True)
         self.vector_store = Chroma(
             collection_name="enterprise_docs",

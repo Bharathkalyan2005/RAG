@@ -2,17 +2,15 @@ import os
 import re
 
 from langchain_community.vectorstores import Chroma
-from langchain_community.embeddings import HuggingFaceEmbeddings
 from rank_bm25 import BM25Okapi
 
 from config import settings
+from rag.embeddings import get_embeddings
 
 
 class HybridRetriever:
     def __init__(self) -> None:
-        self.embeddings = HuggingFaceEmbeddings(
-            model_name=settings.EMBEDDING_MODEL
-        )
+        self.embeddings = get_embeddings()
         os.makedirs(settings.CHROMA_PERSIST_DIR, exist_ok=True)
         self.vector_store = Chroma(
             collection_name="enterprise_docs",

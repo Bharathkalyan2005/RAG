@@ -11,7 +11,7 @@ class Settings(BaseSettings):
     HF_API_KEY: str = os.getenv("HF_API_KEY", "")
     CHROMA_PERSIST_DIR: str = "./vector_db"
     SQLITE_DB_PATH: str = "./database/enterprise_rag.db"
-    EMBEDDING_MODEL: str = "sentence-transformers/all-MiniLM-L6-v2"
+    EMBEDDING_MODEL: str = "models/embedding-001"
     LLM_MODEL: str = "gemini-1.5-flash"
     CHUNK_SIZE: int = 1000
     CHUNK_OVERLAP: int = 200

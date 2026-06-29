@@ -15,6 +15,31 @@ from rag.retriever import HybridRetriever
 UPLOAD_DIR = "./documents/temp"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
+_ingestion_engine: DocumentIngestionEngine | None = None
+_rag_generator: RAGGenerator | None = None
+_hybrid_retriever: HybridRetriever | None = None
+
+
+def get_ingestion_engine() -> DocumentIngestionEngine:
+    global _ingestion_engine
+    if _ingestion_engine is None:
+        _ingestion_engine = DocumentIngestionEngine()
+    return _ingestion_engine
+
+
+def get_rag_generator() -> RAGGenerator:
+    global _rag_generator
+    if _rag_generator is None:
+        _rag_generator = RAGGenerator()
+    return _rag_generator
+
+
+def get_hybrid_retriever() -> HybridRetriever:
+    global _hybrid_retriever
+    if _hybrid_retriever is None:
+        _hybrid_retriever = HybridRetriever()
+    return _hybrid_retriever
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -34,11 +59,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-ingestion_engine = DocumentIngestionEngine()
-rag_generator = RAGGenerator()
-hybrid_retriever = HybridRetriever()
-
 
 @app.get("/")
 def health_check():
@@ -76,7 +96,7 @@ async def upload_document(file: UploadFile = File(...)):
             content = await file.read()
             await out_file.write(content)
 
-        result = ingestion_engine.process_and_index_file(temp_path, file.filename)
+        result = get_ingestion_engine().process_and_index_file(temp_path, file.filename)
         return result
     finally:
         if os.path.exists(temp_path):
@@ -106,7 +126,7 @@ def delete_document(doc_id: str):
         conn.close()
         raise HTTPException(status_code=404, detail="Document not found")
 
-    hybrid_retriever.delete_by_document_id(doc_id)
+    get_hybrid_retriever().delete_by_document_id(doc_id)
     cursor.execute("DELETE FROM documents WHERE id = ?", (doc_id,))
     conn.commit()
     conn.close()
@@ -117,7 +137,7 @@ def delete_document(doc_id: str):
 @app.post("/api/v1/chat/query")
 async def chat_query(request: QueryRequest):
     try:
-        result = rag_generator.generate_answer(
+        result = get_rag_generator().generate_answer(
             query=request.query,
             session_id=request.session_id,
         )

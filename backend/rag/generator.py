@@ -16,7 +16,13 @@ class RAGGenerator:
             google_api_key=settings.GOOGLE_API_KEY,
             max_output_tokens=1024,
         )
-        self.retriever = HybridRetriever()
+        self._retriever: HybridRetriever | None = None
+
+    @property
+    def retriever(self) -> HybridRetriever:
+        if self._retriever is None:
+            self._retriever = HybridRetriever()
+        return self._retriever
 
     def generate_answer(self, query: str, session_id: str) -> dict:
         start_time = time.time()
