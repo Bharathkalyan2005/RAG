@@ -40,7 +40,6 @@ function TypingIndicator() {
 export default function ChatContainer({ sessionId }: ChatContainerProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -49,7 +48,6 @@ export default function ChatContainer({ sessionId }: ChatContainerProps) {
 
   const handleSend = useCallback(
     async (text: string) => {
-      setError(null);
       const userMessage: Message = {
         id: crypto.randomUUID(),
         role: "user",
@@ -69,8 +67,7 @@ export default function ChatContainer({ sessionId }: ChatContainerProps) {
           responseTimeMs: response.response_time_ms,
         };
         setMessages((prev) => [...prev, assistantMessage]);
-      } catch (err) {
-        setError("⚠️ Cannot connect to backend. Please try again later.");
+      } catch {
         setMessages((prev) => [
           ...prev,
           {
