@@ -1,144 +1,121 @@
-import json
 import time
 
-from langchain_huggingface import HuggingFaceEndpoint
 from langchain_core.messages import HumanMessage, SystemMessage
+from langchain_google_genai import ChatGoogleGenerativeAI
 
 from config import settings
 from database import get_db_connection
 from rag.retriever import HybridRetriever
 
-SYSTEM_PROMPT_TEMPLATE = """You are an expert Enterprise Document Assistant. Answer ONLY using the retrieved context below.
-
-RULES:
-1. If the answer is not in the context, reply EXACTLY: "I couldn't find this information in the uploaded documents."
-2. Do not fabricate facts or use outside knowledge.
-3. Keep answers precise and professional.
-4. Every claim must be traceable to the provided sources.
-
-=== RETRIEVED CONTEXT ===
-{context_str}
-"""
-
 
 class RAGGenerator:
     def __init__(self) -> None:
-        self.llm = HuggingFaceEndpoint(
-            repo_id=settings.LLM_MODEL,
-            huggingfacehub_api_token=settings.HF_API_KEY,
-            max_new_tokens=1024,
+        self.llm = ChatGoogleGenerativeAI(
+            model=settings.LLM_MODEL,
             temperature=0.1,
+            google_api_key=settings.GOOGLE_API_KEY,
+            max_output_tokens=1024,
         )
         self.retriever = HybridRetriever()
 
     def generate_answer(self, query: str, session_id: str) -> dict:
         start_time = time.time()
 
-        chunks = self.retriever.retrieve(query, top_k=settings.TOP_K_RESULTS)
+        try:
+            retrieved_chunks = self.retriever.retrieve(query, top_k=4)
+        except Exception:
+            retrieved_chunks = []
 
-        if not chunks:
-            response_time_ms = int((time.time() - start_time) * 1000)
-            self._log_analytics(query, response_time_ms, 0.0, None)
-            return {
-                "answer": "I couldn't find this information in the uploaded documents.",
-                "confidence_score": 0.0,
-                "sources": [],
-                "response_time_ms": response_time_ms,
-            }
+        has_context = (
+            len(retrieved_chunks) > 0
+            and any(c.get("relevance_score", 0) >= 0.3 for c in retrieved_chunks)
+        )
 
-        context_parts = []
-        for idx, chunk in enumerate(chunks, start=1):
-            context_parts.append(
-                f"[Source {idx}: {chunk['filename']} - Page {chunk['page']}]\n{chunk['content']}"
-            )
-        context_str = "\n\n".join(context_parts)
+        if has_context:
+            context_str = ""
+            for i, chunk in enumerate(retrieved_chunks):
+                context_str += (
+                    f"[Source {i + 1}: {chunk.get('filename', 'Unknown')} - "
+                    f"Page {chunk.get('page', 'N/A')}]\n"
+                    f"{chunk.get('content', '')}\n\n"
+                )
 
-        avg_relevance = sum(c["relevance_score"] for c in chunks) / len(chunks)
-        confidence = min(max(avg_relevance, 0.0), 1.0)
+            system_prompt = f"""You are a helpful Enterprise Document Assistant.
+Answer the question using the document context below.
+Always mention which document your answer comes from.
+If the context does not contain the answer, say so and answer from general knowledge.
 
-        prompt = SYSTEM_PROMPT_TEMPLATE.format(context_str=context_str)
-        response = self.llm.invoke(
-            [
-                SystemMessage(content=prompt),
+CONTEXT:
+{context_str}"""
+            mode = "document"
+            raw_sources = retrieved_chunks
+        else:
+            system_prompt = """You are a friendly, helpful AI assistant called Enterprise AI.
+Answer all questions helpfully and conversationally.
+For greetings like 'hi', 'hello', respond warmly and introduce yourself.
+For general questions, answer clearly and accurately.
+For company-specific questions, mention the user can upload documents for specific answers."""
+            mode = "general"
+            raw_sources = []
+
+        try:
+            messages = [
+                SystemMessage(content=system_prompt),
                 HumanMessage(content=query),
             ]
-        )
-        answer = response.strip()
+            response = self.llm.invoke(messages)
+            answer = response.content
+        except Exception as e:
+            answer = f"Sorry, I encountered an error: {str(e)}. Please try again."
+            mode = "error"
+            raw_sources = []
 
-        if "couldn't find" in answer.lower():
+        if mode == "document" and raw_sources:
+            scores = [c.get("relevance_score", 0.5) for c in raw_sources]
+            confidence = round(min(sum(scores) / len(scores) * 100, 100), 1)
+        elif mode == "general":
+            confidence = 95.0
+        else:
             confidence = 0.0
 
-        confidence_score = round(confidence * 100, 1)
         response_time_ms = int((time.time() - start_time) * 1000)
 
-        sources = [
-            {
-                "filename": chunk["filename"],
-                "page": chunk["page"],
-                "excerpt": chunk["content"],
-                "relevance_score": chunk["relevance_score"],
-            }
-            for chunk in chunks
-        ]
+        sources = (
+            [
+                {
+                    "filename": c.get("filename", "Unknown"),
+                    "page": c.get("page", 0),
+                    "excerpt": c.get("content", ""),
+                    "relevance_score": c.get("relevance_score", 0),
+                }
+                for c in raw_sources
+            ]
+            if mode == "document"
+            else []
+        )
 
-        top_document = chunks[0]["filename"] if chunks else None
-        self._log_analytics(query, response_time_ms, confidence, top_document)
-        self._save_chat_messages(session_id, query, answer, sources)
+        try:
+            conn = get_db_connection()
+            conn.execute(
+                """INSERT INTO search_analytics
+                   (query_text, response_time_ms, confidence_score, top_document_matched)
+                   VALUES (?, ?, ?, ?)""",
+                (
+                    query,
+                    response_time_ms,
+                    confidence,
+                    raw_sources[0].get("filename") if raw_sources else None,
+                ),
+            )
+            conn.commit()
+            conn.close()
+        except Exception:
+            pass
 
         return {
             "answer": answer,
-            "confidence_score": confidence_score,
+            "confidence_score": confidence,
             "sources": sources,
             "response_time_ms": response_time_ms,
+            "mode": mode,
         }
-
-    def _log_analytics(
-        self,
-        query: str,
-        response_time_ms: int,
-        confidence: float,
-        top_document: str | None,
-    ) -> None:
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute(
-            """
-            INSERT INTO search_analytics
-            (query_text, response_time_ms, confidence_score, top_document_matched)
-            VALUES (?, ?, ?, ?)
-            """,
-            (query, response_time_ms, confidence, top_document),
-        )
-        conn.commit()
-        conn.close()
-
-    def _save_chat_messages(
-        self, session_id: str, query: str, answer: str, sources: list
-    ) -> None:
-        conn = get_db_connection()
-        cursor = conn.cursor()
-
-        cursor.execute(
-            "SELECT session_id FROM chat_sessions WHERE session_id = ?",
-            (session_id,),
-        )
-        if not cursor.fetchone():
-            cursor.execute(
-                "INSERT INTO chat_sessions (session_id, user_id) VALUES (?, ?)",
-                (session_id, "anonymous"),
-            )
-
-        cursor.execute(
-            "INSERT INTO chat_messages (session_id, role, content) VALUES (?, 'user', ?)",
-            (session_id, query),
-        )
-        cursor.execute(
-            """
-            INSERT INTO chat_messages (session_id, role, content, citations_json)
-            VALUES (?, 'assistant', ?, ?)
-            """,
-            (session_id, answer, json.dumps(sources)),
-        )
-
-        conn.commit()
-        conn.close()

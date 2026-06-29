@@ -13,6 +13,7 @@ interface Message {
   sources?: Source[];
   confidenceScore?: number;
   responseTimeMs?: number;
+  mode?: string;
 }
 
 interface ChatContainerProps {
@@ -47,36 +48,43 @@ export default function ChatContainer({ sessionId }: ChatContainerProps) {
   }, [messages, isLoading]);
 
   const handleSend = useCallback(
-    async (text: string) => {
-      const userMessage: Message = {
-        id: crypto.randomUUID(),
+    async (message: string) => {
+      const userMsg: Message = {
         role: "user",
-        content: text,
+        content: message,
+        id: String(Date.now()),
       };
-      setMessages((prev) => [...prev, userMessage]);
+      setMessages((prev) => [...prev, userMsg]);
       setIsLoading(true);
 
       try {
-        const response = await queryRAG(text, sessionId);
-        const assistantMessage: Message = {
-          id: crypto.randomUUID(),
+        const data = await queryRAG(message, sessionId);
+        const assistantMsg: Message = {
           role: "assistant",
-          content: response.answer,
-          sources: response.sources,
-          confidenceScore: response.confidence_score,
-          responseTimeMs: response.response_time_ms,
+          content:
+            data.answer ||
+            "I received your message but couldn't generate a response.",
+          sources: data.sources || [],
+          confidenceScore: data.confidence_score || 0,
+          responseTimeMs: data.response_time_ms || 0,
+          mode: data.mode || "general",
+          id: String(Date.now() + 1),
         };
-        setMessages((prev) => [...prev, assistantMessage]);
+        setMessages((prev) => [...prev, assistantMsg]);
       } catch {
-        setMessages((prev) => [
-          ...prev,
-          {
-            id: crypto.randomUUID(),
-            role: "assistant",
-            content:
-              "⚠️ Cannot connect to backend. Please try again later.",
-          },
-        ]);
+        const errorMsg: Message = {
+          role: "assistant",
+          content:
+            "⚠️ Cannot connect to the backend server. Please check if the API is running at: " +
+            (process.env.NEXT_PUBLIC_API_URL ||
+              "https://rag-38rs.onrender.com/api/v1"),
+          sources: [],
+          confidenceScore: 0,
+          responseTimeMs: 0,
+          mode: "error",
+          id: String(Date.now() + 1),
+        };
+        setMessages((prev) => [...prev, errorMsg]);
       } finally {
         setIsLoading(false);
       }

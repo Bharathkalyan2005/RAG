@@ -29,7 +29,11 @@ app = FastAPI(title="Enterprise RAG AI Assistant", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://rag-three-pi.vercel.app", "http://localhost:3000"],
+    allow_origins=[
+        "https://rag-three-pi.vercel.app",
+        "http://localhost:3000",
+        "*",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -55,6 +59,7 @@ class QueryResponse(BaseModel):
     confidence_score: float
     sources: list
     response_time_ms: int
+    mode: str = "general"
 
 
 @app.post("/api/v1/documents/upload")
@@ -113,10 +118,22 @@ def delete_document(doc_id: str):
     return {"message": "Document deleted successfully", "document_id": doc_id}
 
 
-@app.post("/api/v1/chat/query", response_model=QueryResponse)
-def chat_query(request: QueryRequest):
-    result = rag_generator.generate_answer(request.query, request.session_id)
-    return result
+@app.post("/api/v1/chat/query")
+async def chat_query(request: QueryRequest):
+    try:
+        result = rag_generator.generate_answer(
+            query=request.query,
+            session_id=request.session_id,
+        )
+        return result
+    except Exception as e:
+        return {
+            "answer": f"Server error: {str(e)}. Please try again.",
+            "confidence_score": 0,
+            "sources": [],
+            "response_time_ms": 0,
+            "mode": "error",
+        }
 
 
 @app.get("/api/v1/analytics/stats")
